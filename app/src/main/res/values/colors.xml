@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- SIPANTAS Brand Colors -->
+    <color name="brand_primary">#195685</color>
+    <color name="brand_primary_dark">#0F3A5A</color>
+    <color name="brand_primary_light">#EBF5FB</color>
+    <color name="brand_accent">#48A27A</color>
+    <color name="brand_accent_light">#EAF6F0</color>
+    
+    <!-- Neutrals & Backgrounds -->
+    <color name="bg_page">#F8FAFC</color>
+    <color name="card_bg">#FFFFFFFF</color>
+    <color name="card_border">#E2E8F0</color>
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#475569</color>
+    <color name="text_muted">#94A3B8</color>
+    
+    <!-- Status Colors -->
+    <color name="status_pending">#D97706</color>
+    <color name="status_pending_light">#FEF3C7</color>
+    <color name="status_success">#16A34A</color>
+    <color name="status_success_light">#DCFCE7</color>
+</resources>
