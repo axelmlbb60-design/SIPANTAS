@@ -238,8 +238,24 @@ class ProfileActivity : AppCompatActivity() {
             inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
         }
 
+        val cbShowPassword = android.widget.CheckBox(this).apply {
+            text = "Tampilkan kata sandi"
+            setOnCheckedChangeListener { _, isChecked ->
+                val type = if (isChecked) {
+                    android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                } else {
+                    android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+                }
+                etCurrentPass.inputType = type
+                etNewPass.inputType = type
+                etCurrentPass.setSelection(etCurrentPass.text.length)
+                etNewPass.setSelection(etNewPass.text.length)
+            }
+        }
+
         layout.addView(etCurrentPass)
         layout.addView(etNewPass)
+        layout.addView(cbShowPassword)
 
         AlertDialog.Builder(this)
             .setTitle("Ganti Kata Sandi")
@@ -408,7 +424,7 @@ class ProfileActivity : AppCompatActivity() {
         }
         AlertDialog.Builder(this)
             .setTitle("Pengaturan REST API Server")
-            .setMessage("Base URL server saat ini:")
+            .setMessage("Base URL server saat ini:\n• HP Fisik (Wi-Fi): http://192.168.1.38/api_sipantas/\n• Emulator Android Studio: http://10.0.2.2/api_sipantas/")
             .setView(input)
             .setPositiveButton("Simpan") { _, _ ->
                 val newUrl = input.text.toString().trim()
@@ -417,9 +433,9 @@ class ProfileActivity : AppCompatActivity() {
                     Toast.makeText(this, "Base URL disimpan: ${sessionManager.getBaseUrl()}", Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNeutralButton("Reset Default") { _, _ ->
-                sessionManager.setBaseUrl(SessionManager.DEFAULT_BASE_URL)
-                Toast.makeText(this, "Reset ke: ${SessionManager.DEFAULT_BASE_URL}", Toast.LENGTH_SHORT).show()
+            .setNeutralButton("Set IP Laptop Wi-Fi") { _, _ ->
+                sessionManager.setBaseUrl(SessionManager.LAPTOP_WIFI_BASE_URL)
+                Toast.makeText(this, "Base URL diset ke: ${SessionManager.LAPTOP_WIFI_BASE_URL}", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Batal", null)
             .show()

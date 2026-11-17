@@ -66,6 +66,16 @@ class QueueActivity : AppCompatActivity() {
                 val body = response.body()
                 if (response.isSuccessful && body != null && body.success && body.data != null) {
                     val ticket = body.data
+
+                    // Jadwalkan notifikasi pengingat H-1 antrean
+                    com.example.sipantas.notification.NotificationHelper.scheduleQueueReminder(
+                        context = this@QueueActivity,
+                        queueId = ticket.id,
+                        targetDateStr = ticket.tanggal,
+                        sessionStr = ticket.sesi,
+                        ticketNo = ticket.nomorTiket
+                    )
+
                     AlertDialog.Builder(this@QueueActivity)
                         .setTitle("✅ Tiket Antrean Berhasil Dipesan")
                         .setMessage(
@@ -74,6 +84,7 @@ class QueueActivity : AppCompatActivity() {
                             "Layanan: ${ticket.layanan}\n" +
                             "Tanggal: ${ticket.tanggal}\n" +
                             "Sesi: ${ticket.sesi}\n\n" +
+                            "✓ Notifikasi pengingat antrean H-1 telah dijadwalkan di perangkat Anda.\n" +
                             "Silakan datang 10 menit sebelum sesi dimulai."
                         )
                         .setPositiveButton("Selesai") { _, _ ->

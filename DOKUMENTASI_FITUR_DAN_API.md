@@ -104,6 +104,9 @@
 | `/dashboard_stats.php` | GET | Statistik surat & demografi kecamatan | *(None)* |
 | `/change_password.php` | POST | Ganti password mandiri / reset oleh Kecamatan | `action` (`change`/`reset_by_admin`), `user_id`, `current_password`, `new_password` |
 | `/wilayah_crud.php` | POST | CRUD data wilayah Kelurahan, RW, dan RT | `type`, `action`, `nama`/`nomor` |
+| `/update_fcm_token.php` | POST | Registrasi / update token FCM perangkat Android | `user_id`, `fcm_token` |
+| `/get_notifications.php` | GET | Riwayat notifikasi masuk pengguna | `user_id` |
+| `/antrean_reminder.php` | GET/POST | Pemicu pengingat antrean kunjungan H-1 | *(Otomatis deteksi jadwal besok)* |
 
 ---
 

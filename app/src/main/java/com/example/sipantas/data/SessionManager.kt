@@ -24,8 +24,10 @@ class SessionManager(context: Context) {
         private const val KEY_NOMOR_RW = "nomor_rw"
         private const val KEY_BASE_URL = "base_url"
 
-        // Default base URL: 10.0.2.2 is Android Emulator's alias for host machine localhost
-        const val DEFAULT_BASE_URL = "http://10.0.2.2/api_sipantas/"
+        // Default base URL: IP laptop di jaringan Wi-Fi lokal untuk pengujian di HP fisik
+        const val LAPTOP_WIFI_BASE_URL = "http://192.168.1.38/api_sipantas/"
+        const val EMULATOR_BASE_URL = "http://10.0.2.2/api_sipantas/"
+        const val DEFAULT_BASE_URL = LAPTOP_WIFI_BASE_URL
     }
 
     fun saveUserSession(user: UserModel) {
@@ -68,7 +70,12 @@ class SessionManager(context: Context) {
     fun getRw(): String = prefs.getString(KEY_NOMOR_RW, "") ?: ""
 
     fun getBaseUrl(): String {
-        return prefs.getString(KEY_BASE_URL, DEFAULT_BASE_URL) ?: DEFAULT_BASE_URL
+        val saved = prefs.getString(KEY_BASE_URL, null)
+        if (saved == null || saved.contains("10.0.2.2")) {
+            // Default ke IP Wi-Fi Laptop (192.168.1.38) agar HP fisik langsung terhubung
+            return DEFAULT_BASE_URL
+        }
+        return saved
     }
 
     fun setBaseUrl(url: String) {

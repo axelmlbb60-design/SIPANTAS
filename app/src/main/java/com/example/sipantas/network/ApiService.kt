@@ -182,4 +182,12 @@ interface ApiService {
         @Field("new_password") newPass: String,
         @Field("admin_id") adminId: Int? = null
     ): Call<ApiResponse<Void>>
+
+    // FCM Push Notification Token
+    @FormUrlEncoded
+    @POST("update_fcm_token.php")
+    fun updateFcmToken(
+        @Field("user_id") userId: Int,
+        @Field("fcm_token") token: String
+    ): Call<ApiResponse<Map<String, Any>>>
 }

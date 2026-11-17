@@ -42,6 +42,9 @@ class MainActivity : AppCompatActivity() {
         setupUserHeader()
         setupAccountBanner()
         setupNavigation()
+
+        // Inisialisasi Channel Notifikasi Android
+        com.example.sipantas.notification.NotificationHelper.createNotificationChannel(this)
     }
 
     override fun onResume() {
@@ -172,6 +175,19 @@ class MainActivity : AppCompatActivity() {
                         bannerRtrw.visibility = View.VISIBLE
                         tvRtrwCount.text = count.toString()
                         tvRtrwDesc.text = "Ada $count permohonan surat warga menunggu tanda tangan digital Anda."
+                        
+                        // Tampilkan System Notification di perangkat RT / RW
+                        com.example.sipantas.notification.NotificationHelper.showSystemNotification(
+                            context = this@MainActivity,
+                            title = "📬 Permohonan Surat Baru Masuk!",
+                            message = "Ada $count surat pengantar baru dari warga menunggu tanda tangan digital Anda.",
+                            notificationId = 777,
+                            intent = Intent(this@MainActivity, LetterDetailActivity::class.java).apply {
+                                putExtra("EXTRA_PENGAJUAN_ID", list[0].id)
+                                putExtra("EXTRA_SERVICE_NAME", list[0].jenisSurat)
+                            }
+                        )
+
                         bannerRtrw.setOnClickListener {
                             val intent = Intent(this@MainActivity, LetterDetailActivity::class.java).apply {
                                 putExtra("EXTRA_PENGAJUAN_ID", list[0].id)

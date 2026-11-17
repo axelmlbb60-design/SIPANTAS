@@ -184,20 +184,21 @@ class LoginActivity : AppCompatActivity() {
             setText(sessionManager.getBaseUrl())
             setSelection(text.length)
         }
+
         AlertDialog.Builder(this)
             .setTitle("Pengaturan REST API Server")
-            .setMessage("Masukkan base URL server SIPANTAS (Contoh:\nEmulator: http://10.0.2.2/api_sipantas/\nHP Fisik: http://192.168.1.X/api_sipantas/):")
+            .setMessage("Pilih atau ketik Base URL server SIPANTAS:\n• HP Fisik (Wi-Fi): http://192.168.1.38/api_sipantas/\n• Emulator Android Studio: http://10.0.2.2/api_sipantas/")
             .setView(input)
             .setPositiveButton("Simpan") { _, _ ->
                 val newUrl = input.text.toString().trim()
                 if (newUrl.isNotBlank()) {
                     sessionManager.setBaseUrl(newUrl)
-                    Toast.makeText(this, "Base URL disimpan: ${sessionManager.getBaseUrl()}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Base URL tersimpan: ${sessionManager.getBaseUrl()}", Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNeutralButton("Reset Default") { _, _ ->
-                sessionManager.setBaseUrl(SessionManager.DEFAULT_BASE_URL)
-                Toast.makeText(this, "Reset ke: ${SessionManager.DEFAULT_BASE_URL}", Toast.LENGTH_SHORT).show()
+            .setNeutralButton("Set IP Laptop Wi-Fi") { _, _ ->
+                sessionManager.setBaseUrl(SessionManager.LAPTOP_WIFI_BASE_URL)
+                Toast.makeText(this, "Base URL diset ke: ${SessionManager.LAPTOP_WIFI_BASE_URL}", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Batal", null)
             .show()
