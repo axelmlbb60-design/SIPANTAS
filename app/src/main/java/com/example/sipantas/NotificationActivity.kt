@@ -50,9 +50,7 @@ class NotificationActivity : AppCompatActivity() {
             insets
         }
 
-        findViewById<ImageView>(R.id.btn_back).setOnClickListener {
-            finish()
-        }
+        com.example.sipantas.ui.BottomNavHelper.setupBottomNav(this, com.example.sipantas.ui.BottomNavHelper.TAB_KABAR)
 
         rvNotifications = findViewById(R.id.rv_notifications)
         containerEmpty = findViewById(R.id.container_empty_notif)
@@ -77,6 +75,12 @@ class NotificationActivity : AppCompatActivity() {
             markAllAsRead()
         }
 
+        loadNotifications()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        com.example.sipantas.ui.BottomNavHelper.setupBottomNav(this, com.example.sipantas.ui.BottomNavHelper.TAB_KABAR)
         loadNotifications()
     }
 
@@ -163,8 +167,11 @@ class NotificationActivity : AppCompatActivity() {
 
         when (item.tipe?.lowercase()) {
             "surat" -> {
-                detailDialog.setNeutralButton("Buka Pengajuan") { _, _ ->
-                    val intent = Intent(this, ServiceListActivity::class.java)
+                detailDialog.setNeutralButton("Buka Detail Surat") { _, _ ->
+                    val intent = Intent(this, LetterDetailActivity::class.java).apply {
+                        putExtra("EXTRA_PENGAJUAN_ID", item.dataId ?: 1)
+                        putExtra("EXTRA_SERVICE_NAME", item.judul)
+                    }
                     startActivity(intent)
                 }
             }

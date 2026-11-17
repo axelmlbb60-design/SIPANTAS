@@ -38,6 +38,12 @@ try {
     exit;
 }
 
+function getBaseUrl() {
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
+    $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+    return $protocol . $host . '/api_sipantas';
+}
+
 function responseJson($success, $message, $data = null) {
     $res = [
         "success" => $success,

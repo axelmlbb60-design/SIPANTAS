@@ -61,7 +61,14 @@ class SplashActivity : AppCompatActivity() {
         hasNavigated = true
         fallbackHandler.removeCallbacks(fallbackRunnable)
 
-        val intent = Intent(this, WelcomeActivity::class.java)
+        val sessionManager = com.example.sipantas.data.SessionManager(this)
+        val targetClass = if (sessionManager.isLoggedIn()) {
+            MainActivity::class.java
+        } else {
+            WelcomeActivity::class.java
+        }
+
+        val intent = Intent(this, targetClass)
         startActivity(intent)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {

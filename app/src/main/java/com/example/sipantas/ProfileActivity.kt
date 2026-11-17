@@ -2,6 +2,8 @@ package com.example.sipantas
 
 import android.app.ProgressDialog
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -21,14 +24,25 @@ import com.example.sipantas.data.DashboardStats
 import com.example.sipantas.data.SessionManager
 import com.example.sipantas.data.UserModel
 import com.example.sipantas.network.ApiClient
+import com.example.sipantas.ui.BottomNavHelper
 import com.google.android.material.button.MaterialButton
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.net.URL
 
 class ProfileActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
+
+    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        if (uri != null) {
+            uploadProfilePhoto(uri)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,12 +53,22 @@ class ProfileActivity : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.profile_root)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
             insets
         }
 
-        findViewById<ImageView>(R.id.btn_back).setOnClickListener {
-            finish()
+        BottomNavHelper.setupBottomNav(this, BottomNavHelper.TAB_BANTUAN)
+
+        findViewById<View>(R.id.container_profile_avatar)?.setOnClickListener {
+            galleryLauncher.launch("image/*")
+        }
+
+        findViewById<View>(R.id.btn_change_photo)?.setOnClickListener {
+            galleryLauncher.launch("image/*")
+        }
+
+        findViewById<View>(R.id.btn_edit_profile)?.setOnClickListener {
+            showEditProfileDialog()
         }
 
         setupProfileHeader()
@@ -77,6 +101,188 @@ class ProfileActivity : AppCompatActivity() {
                 tvStatus.setTextColor(ContextCompat.getColor(this, R.color.status_success))
             }
         }
+
+        loadAvatarImage()
+    }
+
+    private fun loadAvatarImage() {
+        val avatarUrl = sessionManager.getFotoProfil()
+        val ivAvatar = findViewById<ImageView>(R.id.iv_profile_avatar) ?: return
+
+        if (avatarUrl.isNotBlank() && avatarUrl.startsWith("http")) {
+            Thread {
+                try {
+                    val url = URL(avatarUrl)
+                    val bmp = BitmapFactory.decodeStream(url.openStream())
+                    if (bmp != null) {
+                        runOnUiThread {
+                            ivAvatar.setImageBitmap(bmp)
+                            ivAvatar.imageTintList = null
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }.start()
+        }
+    }
+
+    private fun uploadProfilePhoto(uri: Uri) {
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("Mengunggah foto profil...")
+            setCancelable(false)
+            show()
+        }
+
+        val ivAvatar = findViewById<ImageView>(R.id.iv_profile_avatar)
+        ivAvatar?.setImageURI(uri)
+        ivAvatar?.imageTintList = null
+
+        Thread {
+            try {
+                val inputStream = contentResolver.openInputStream(uri)
+                val bytes = inputStream?.readBytes()
+                inputStream?.close()
+
+                if (bytes == null) {
+                    runOnUiThread {
+                        progressDialog.dismiss()
+                        Toast.makeText(this@ProfileActivity, "Gagal membaca berkas gambar", Toast.LENGTH_SHORT).show()
+                    }
+                    return@Thread
+                }
+
+                val reqFile = bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                val partPhoto = MultipartBody.Part.createFormData("foto_profil", "avatar_${System.currentTimeMillis()}.jpg", reqFile)
+                val userIdPart = sessionManager.getUserId().toString().toRequestBody("text/plain".toMediaTypeOrNull())
+
+                val api = ApiClient.getService(this@ProfileActivity)
+                val call = api.updateProfile(userIdPart, null, null, null, null, partPhoto)
+
+                call.enqueue(object : Callback<ApiResponse<UserModel>> {
+                    override fun onResponse(call: Call<ApiResponse<UserModel>>, response: Response<ApiResponse<UserModel>>) {
+                        progressDialog.dismiss()
+                        if (response.isSuccessful && response.body()?.success == true) {
+                            val user = response.body()?.data
+                            val newPhotoUrl = user?.fotoProfilUrl ?: user?.fotoProfil ?: ""
+                            sessionManager.updateProfileData(
+                                sessionManager.getNama(),
+                                sessionManager.getPhone(),
+                                sessionManager.getEmail(),
+                                sessionManager.getAlamatDomisili(),
+                                newPhotoUrl
+                            )
+                            Toast.makeText(this@ProfileActivity, "Foto profil berhasil diperbarui!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@ProfileActivity, "Gagal mengunggah: ${response.body()?.message ?: "Terjadi kesalahan"}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<ApiResponse<UserModel>>, t: Throwable) {
+                        progressDialog.dismiss()
+                        Toast.makeText(this@ProfileActivity, "Koneksi gagal: ${t.localizedMessage}", Toast.LENGTH_SHORT).show()
+                    }
+                })
+            } catch (e: Exception) {
+                runOnUiThread {
+                    progressDialog.dismiss()
+                    Toast.makeText(this@ProfileActivity, "Terjadi kesalahan: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
+    }
+
+    private fun showEditProfileDialog() {
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(50, 40, 50, 20)
+        }
+
+        val tvTitleNama = TextView(this).apply { text = "Nama Lengkap"; textSize = 12f; setTextColor(ContextCompat.getColor(context, R.color.text_secondary)) }
+        val etNama = EditText(this).apply {
+            setText(sessionManager.getNama())
+            hint = "Nama Lengkap"
+        }
+
+        val tvTitlePhone = TextView(this).apply { text = "Nomor Telepon / WhatsApp"; textSize = 12f; setTextColor(ContextCompat.getColor(context, R.color.text_secondary)); setPadding(0, 16, 0, 0) }
+        val etPhone = EditText(this).apply {
+            setText(sessionManager.getPhone())
+            hint = "Nomor HP / WA"
+        }
+
+        val tvTitleEmail = TextView(this).apply { text = "Email"; textSize = 12f; setTextColor(ContextCompat.getColor(context, R.color.text_secondary)); setPadding(0, 16, 0, 0) }
+        val etEmail = EditText(this).apply {
+            setText(sessionManager.getEmail())
+            hint = "Alamat Email"
+        }
+
+        val tvTitleDomisili = TextView(this).apply { text = "Alamat Domisili"; textSize = 12f; setTextColor(ContextCompat.getColor(context, R.color.text_secondary)); setPadding(0, 16, 0, 0) }
+        val etDomisili = EditText(this).apply {
+            setText(sessionManager.getAlamatDomisili())
+            hint = "Alamat Lengkap Domisili"
+        }
+
+        layout.addView(tvTitleNama)
+        layout.addView(etNama)
+        layout.addView(tvTitlePhone)
+        layout.addView(etPhone)
+        layout.addView(tvTitleEmail)
+        layout.addView(etEmail)
+        layout.addView(tvTitleDomisili)
+        layout.addView(etDomisili)
+
+        AlertDialog.Builder(this)
+            .setTitle("Ubah Data Profil")
+            .setView(layout)
+            .setPositiveButton("Simpan") { _, _ ->
+                val newNama = etNama.text.toString().trim()
+                val newPhone = etPhone.text.toString().trim()
+                val newEmail = etEmail.text.toString().trim()
+                val newDomisili = etDomisili.text.toString().trim()
+
+                if (newNama.isBlank()) {
+                    Toast.makeText(this, "Nama tidak boleh kosong", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                saveProfileData(newNama, newPhone, newEmail, newDomisili)
+            }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun saveProfileData(nama: String, phone: String, email: String, domisili: String) {
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("Menyimpan data profil...")
+            setCancelable(false)
+            show()
+        }
+
+        val userIdPart = sessionManager.getUserId().toString().toRequestBody("text/plain".toMediaTypeOrNull())
+        val namaPart = nama.toRequestBody("text/plain".toMediaTypeOrNull())
+        val phonePart = phone.toRequestBody("text/plain".toMediaTypeOrNull())
+        val emailPart = email.toRequestBody("text/plain".toMediaTypeOrNull())
+        val domisiliPart = domisili.toRequestBody("text/plain".toMediaTypeOrNull())
+
+        val api = ApiClient.getService(this)
+        api.updateProfile(userIdPart, namaPart, phonePart, emailPart, domisiliPart, null)
+            .enqueue(object : Callback<ApiResponse<UserModel>> {
+                override fun onResponse(call: Call<ApiResponse<UserModel>>, response: Response<ApiResponse<UserModel>>) {
+                    progressDialog.dismiss()
+                    if (response.isSuccessful && response.body()?.success == true) {
+                        sessionManager.updateProfileData(nama, phone, email, domisili)
+                        setupProfileHeader()
+                        Toast.makeText(this@ProfileActivity, "Data profil berhasil diperbarui!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@ProfileActivity, "Gagal menyimpan: ${response.body()?.message ?: "Terjadi kesalahan"}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<ApiResponse<UserModel>>, t: Throwable) {
+                    progressDialog.dismiss()
+                    Toast.makeText(this@ProfileActivity, "Koneksi gagal: ${t.localizedMessage}", Toast.LENGTH_SHORT).show()
+                }
+            })
     }
 
     private fun setupRoleSpecificMenus() {

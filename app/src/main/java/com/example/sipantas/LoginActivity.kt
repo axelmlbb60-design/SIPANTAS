@@ -86,25 +86,9 @@ class LoginActivity : AppCompatActivity() {
         val etIdentifier = findViewById<TextInputEditText>(R.id.et_identifier)
         val etPassword = findViewById<TextInputEditText>(R.id.et_password)
 
-        // Pre-fill demo accounts for instant ease of testing
-        when (currentRole.lowercase()) {
-            "warga" -> {
-                etIdentifier.setText("7371010101010001")
-                etPassword.setText("warga123")
-            }
-            "rt / rw", "rtrw" -> {
-                etIdentifier.setText("7371010202020001")
-                etPassword.setText("rtrw123")
-            }
-            "petugas kelurahan", "kecamatan" -> {
-                etIdentifier.setText("7371010303030001")
-                etPassword.setText("kecamatan123")
-            }
-            "admin sistem", "admin" -> {
-                etIdentifier.setText("7371010404040001")
-                etPassword.setText("admin123")
-            }
-        }
+        // Form login kosong secara default
+        etIdentifier.setText("")
+        etPassword.setText("")
 
         findViewById<MaterialButton>(R.id.btn_login).setOnClickListener {
             val identifier = etIdentifier.text?.toString()?.trim() ?: ""

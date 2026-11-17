@@ -22,6 +22,8 @@ data class UserModel(
     @SerializedName("alamat_domisili") val alamatDomisili: String? = null,
     @SerializedName("foto_ktp") val fotoKtp: String? = null,
     @SerializedName("foto_ktp_url") val fotoKtpUrl: String? = null,
+    @SerializedName("foto_profil") val fotoProfil: String? = null,
+    @SerializedName("foto_profil_url") val fotoProfilUrl: String? = null,
     @SerializedName("kecamatan_id") val kecamatanId: Int? = null,
     @SerializedName("kelurahan_id") val kelurahanId: Int? = null,
     @SerializedName("rw_id") val rwId: Int? = null,

@@ -48,6 +48,7 @@ class RegisterOfficerActivity : AppCompatActivity() {
         val tvLabelExtra1 = findViewById<TextView>(R.id.tv_label_extra1)
         val etExtra1 = findViewById<EditText>(R.id.et_officer_extra1)
         val etInviteCode = findViewById<EditText>(R.id.et_invite_code)
+        val etNik = findViewById<EditText>(R.id.et_officer_nik)
         val etName = findViewById<EditText>(R.id.et_officer_name)
         val etPhone = findViewById<EditText>(R.id.et_officer_phone)
         val etEmail = findViewById<EditText>(R.id.et_officer_email)
@@ -80,14 +81,20 @@ class RegisterOfficerActivity : AppCompatActivity() {
 
         btnActivate.setOnClickListener {
             val code = etInviteCode.text.toString().trim()
+            val nik = etNik.text.toString().trim()
             val name = etName.text.toString().trim()
             val phone = etPhone.text.toString().trim()
             val email = etEmail.text.toString().trim()
             val extra1 = etExtra1.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
-            if (code.isEmpty() || name.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Kode undangan, nama lengkap, dan kata sandi wajib diisi!", Toast.LENGTH_SHORT).show()
+            if (code.isEmpty() || nik.isEmpty() || name.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Kode undangan, NIK, nama lengkap, dan kata sandi wajib diisi!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (nik.length != 16) {
+                Toast.makeText(this, "Nomor NIK harus tepat 16 digit angka!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -104,6 +111,7 @@ class RegisterOfficerActivity : AppCompatActivity() {
             apiService.registerOfficer(
                 role = targetRole,
                 kode = code,
+                nik = nik,
                 nama = name,
                 noHp = phone,
                 email = email,

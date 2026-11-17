@@ -3,6 +3,7 @@ require_once "config.php";
 
 $role = isset($_POST['role']) ? trim($_POST['role']) : '';
 $kode_undangan = isset($_POST['kode_undangan']) ? trim($_POST['kode_undangan']) : '';
+$nik = isset($_POST['nik']) ? trim($_POST['nik']) : '';
 $nama = isset($_POST['nama_lengkap']) ? trim($_POST['nama_lengkap']) : '';
 $no_hp = isset($_POST['no_hp']) ? trim($_POST['no_hp']) : '';
 $email = isset($_POST['email']) ? trim($_POST['email']) : '';
@@ -32,11 +33,9 @@ if (empty($kode_undangan)) {
     responseJson(false, "Kode undangan aktivasi wajib diisi!");
 }
 
-// Auto generate 16 digit NIK for officer if not provided
-$nik = isset($_POST['nik']) && strlen(trim($_POST['nik'])) === 16 ? trim($_POST['nik']) : '';
-if (empty($nik)) {
-    $prefix = ($roleDb === 'rtrw') ? '737102' : (($roleDb === 'kecamatan') ? '737103' : '737104');
-    $nik = $prefix . substr(str_pad(time(), 10, '0', STR_PAD_LEFT), 0, 10);
+// Validate NIK (16 digit)
+if (empty($nik) || strlen($nik) !== 16 || !ctype_digit($nik)) {
+    responseJson(false, "Nomor NIK harus tepat 16 digit angka!");
 }
 
 // Check existing user by NIK
@@ -45,8 +44,7 @@ mysqli_stmt_bind_param($check, "s", $nik);
 mysqli_stmt_execute($check);
 mysqli_stmt_store_result($check);
 if (mysqli_stmt_num_rows($check) > 0) {
-    // Regenerate unique NIK if conflict
-    $nik = substr($nik, 0, 12) . rand(1000, 9999);
+    responseJson(false, "Nomor NIK $nik sudah terdaftar di sistem SIPANTAS!");
 }
 
 // Insert new officer user

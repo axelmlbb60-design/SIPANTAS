@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        com.example.sipantas.ui.BottomNavHelper.setupBottomNav(this, com.example.sipantas.ui.BottomNavHelper.TAB_BERANDA)
         loadSubmissions()
     }
 
@@ -110,9 +111,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation() {
-        // Hero button -> ServiceList
-        findViewById<MaterialButton>(R.id.btn_hero_apply).setOnClickListener {
-            startActivity(Intent(this, ServiceListActivity::class.java))
+        // Hero button -> ServiceList (Disadur sesuai peran)
+        val role = sessionManager.getRole()
+        val btnHero = findViewById<MaterialButton>(R.id.btn_hero_apply)
+        if (role == "rtrw") {
+            btnHero.text = "Tinjau surat warga"
+            btnHero.setOnClickListener {
+                startActivity(Intent(this, ServiceListActivity::class.java))
+            }
+        } else if (role == "kecamatan") {
+            btnHero.text = "Tinjau pengesahan"
+            btnHero.setOnClickListener {
+                startActivity(Intent(this, ServiceListActivity::class.java))
+            }
+        } else {
+            btnHero.text = "Ajukan surat"
+            btnHero.setOnClickListener {
+                startActivity(Intent(this, ServiceListActivity::class.java))
+            }
         }
 
         // Antrean -> QueueActivity
@@ -141,23 +157,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, NotificationActivity::class.java))
         }
 
-        // Bottom Navigation Bar Clicks
-        findViewById<View>(R.id.nav_beranda).setOnClickListener {
-            // Already on Beranda
-        }
-
-        findViewById<View>(R.id.nav_pengajuan).setOnClickListener {
-            startActivity(Intent(this, ServiceListActivity::class.java))
-        }
-
-        findViewById<View>(R.id.nav_kabar).setOnClickListener {
-            startActivity(Intent(this, NotificationActivity::class.java))
-        }
-
-        findViewById<View>(R.id.nav_bantuan).setOnClickListener {
-            val intent = Intent(this, ProfileActivity::class.java)
-            startActivity(intent)
-        }
+        // Bottom Navigation Bar
+        com.example.sipantas.ui.BottomNavHelper.setupBottomNav(this, com.example.sipantas.ui.BottomNavHelper.TAB_BERANDA)
     }
 
     private fun loadSubmissions() {

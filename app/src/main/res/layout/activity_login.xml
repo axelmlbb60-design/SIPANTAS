@@ -65,12 +65,12 @@
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
-            <!-- Field: Nomor Ponsel atau Email -->
+            <!-- Field: Nomor NIK -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Nomor ponsel atau email"
+                android:text="Nomor NIK"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -91,8 +91,8 @@
                     android:id="@+id/et_identifier"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Masukkan nomor atau email"
-                    android:inputType="textEmailAddress"
+                    android:hint="Masukkan 16 digit NIK"
+                    android:inputType="number"
                     android:padding="16dp"
                     android:textColor="@color/text_primary"
                     android:textSize="14sp" />

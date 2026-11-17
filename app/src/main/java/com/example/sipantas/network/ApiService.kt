@@ -204,6 +204,7 @@ interface ApiService {
     fun registerOfficer(
         @Field("role") role: String,
         @Field("kode_undangan") kode: String,
+        @Field("nik") nik: String,
         @Field("nama_lengkap") nama: String,
         @Field("no_hp") noHp: String,
         @Field("email") email: String,
@@ -214,6 +215,18 @@ interface ApiService {
         @Field("rw_id") rwId: Int? = null,
         @Field("rt_id") rtId: Int? = null
     ): Call<ApiResponse<Map<String, Any>>>
+
+    // Edit Profil & Foto
+    @Multipart
+    @POST("update_profile.php")
+    fun updateProfile(
+        @Part("user_id") userId: RequestBody,
+        @Part("nama_lengkap") nama: RequestBody?,
+        @Part("no_hp") phone: RequestBody?,
+        @Part("email") email: RequestBody?,
+        @Part("alamat_domisili") domisili: RequestBody?,
+        @Part fotoProfil: MultipartBody.Part?
+    ): Call<ApiResponse<UserModel>>
 
     // Pusat Notifikasi (Screen 24)
     @GET("get_notifications.php")

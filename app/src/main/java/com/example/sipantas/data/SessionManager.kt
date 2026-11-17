@@ -22,6 +22,7 @@ class SessionManager(context: Context) {
         private const val KEY_NAMA_KECAMATAN = "nama_kecamatan"
         private const val KEY_NOMOR_RT = "nomor_rt"
         private const val KEY_NOMOR_RW = "nomor_rw"
+        private const val KEY_FOTO_PROFIL = "foto_profil"
         private const val KEY_BASE_URL = "base_url"
 
         // Default base URL: IP laptop di jaringan Wi-Fi lokal untuk pengujian di HP fisik
@@ -46,6 +47,20 @@ class SessionManager(context: Context) {
             putString(KEY_NAMA_KECAMATAN, user.namaKecamatan ?: "")
             putString(KEY_NOMOR_RT, user.nomorRt ?: "")
             putString(KEY_NOMOR_RW, user.nomorRw ?: "")
+            putString(KEY_FOTO_PROFIL, user.fotoProfilUrl ?: user.fotoProfil ?: user.fotoKtpUrl ?: "")
+            apply()
+        }
+    }
+
+    fun updateProfileData(nama: String, phone: String, email: String, domisili: String, fotoUrl: String? = null) {
+        prefs.edit().apply {
+            putString(KEY_NAMA, nama)
+            putString(KEY_PHONE, phone)
+            putString(KEY_EMAIL, email)
+            putString(KEY_ALAMAT_DOMISILI, domisili)
+            if (!fotoUrl.isNullOrBlank()) {
+                putString(KEY_FOTO_PROFIL, fotoUrl)
+            }
             apply()
         }
     }
@@ -64,6 +79,7 @@ class SessionManager(context: Context) {
     fun getStatusAkun(): String = prefs.getString(KEY_STATUS_AKUN, "aktif") ?: "aktif"
     fun getTipePenduduk(): String = prefs.getString(KEY_TIPE_PENDUDUK, "tetap") ?: "tetap"
     fun getAlamatDomisili(): String = prefs.getString(KEY_ALAMAT_DOMISILI, "") ?: ""
+    fun getFotoProfil(): String = prefs.getString(KEY_FOTO_PROFIL, "") ?: ""
     fun getKelurahan(): String = prefs.getString(KEY_NAMA_KELURAHAN, "") ?: ""
     fun getKecamatan(): String = prefs.getString(KEY_NAMA_KECAMATAN, "") ?: ""
     fun getRt(): String = prefs.getString(KEY_NOMOR_RT, "") ?: ""

@@ -57,6 +57,8 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var etPhone: TextInputEditText
     private lateinit var etPassword: TextInputEditText
     private lateinit var etAddress: TextInputEditText
+    private lateinit var etRw: TextInputEditText
+    private lateinit var etRt: TextInputEditText
     private lateinit var tvUploadStatus: TextView
 
     private var selectedKtpUri: Uri? = null
@@ -100,6 +102,8 @@ class RegisterActivity : AppCompatActivity() {
         etPhone = findViewById(R.id.et_phone)
         etPassword = findViewById(R.id.et_register_password)
         etAddress = findViewById(R.id.et_address)
+        etRw = findViewById(R.id.et_rw)
+        etRt = findViewById(R.id.et_rt)
         tvUploadStatus = findViewById(R.id.tv_upload_ktp_status)
 
         findViewById<ImageView>(R.id.btn_back).setOnClickListener {
@@ -123,12 +127,14 @@ class RegisterActivity : AppCompatActivity() {
             handleNextStep()
         }
 
-        // Initialize default demo values
-        etFullName.setText("Budi Santoso")
-        etNik.setText("7371010101010001")
-        etPhone.setText("081234567890")
-        etPassword.setText("warga123")
-        etAddress.setText("Jl. Perintis Kemerdekaan No. 45, RT 03 / RW 02")
+        // Form kosong secara default
+        etFullName.setText("")
+        etNik.setText("")
+        etPhone.setText("")
+        etPassword.setText("")
+        etAddress.setText("")
+        etRw.setText("")
+        etRt.setText("")
     }
 
     private fun handleKtpFileSelection(uri: Uri) {
@@ -201,7 +207,17 @@ class RegisterActivity : AppCompatActivity() {
                 updateStepUI()
             }
             2 -> {
+                val rw = etRw.text?.toString()?.trim() ?: ""
+                val rt = etRt.text?.toString()?.trim() ?: ""
                 val address = etAddress.text?.toString()?.trim() ?: ""
+                if (rw.isBlank()) {
+                    etRw.error = "Nomor RW wajib diisi"
+                    return
+                }
+                if (rt.isBlank()) {
+                    etRt.error = "Nomor RT wajib diisi"
+                    return
+                }
                 if (address.isBlank()) {
                     etAddress.error = "Alamat lengkap wajib diisi"
                     return
