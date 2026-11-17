@@ -67,6 +67,103 @@
                     android:src="@drawable/ic_sipantas_logo" />
             </LinearLayout>
 
+            <!-- Banner Status Akun (Menunggu Verifikasi / Proses Pindah) -->
+            <LinearLayout
+                android:id="@+id/banner_account_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_role_card"
+                android:orientation="horizontal"
+                android:padding="14dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tv_banner_icon"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/bg_status_badge"
+                    android:gravity="center"
+                    android:text="⏳"
+                    android:textSize="16sp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_banner_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Status Akun: Menunggu Verifikasi RT"
+                        android:textColor="@color/status_pending"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_banner_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Data pendaftaran Anda sedang dicocokkan dengan dokumen KTP oleh Ketua RT."
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Banner Notifikasi RT / RW (Permohonan Masuk) -->
+            <LinearLayout
+                android:id="@+id/banner_rtrw_badge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_primary_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="horizontal"
+                android:padding="14dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tv_rtrw_badge_count"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/bg_role_chip"
+                    android:gravity="center"
+                    android:text="2"
+                    android:textColor="@color/brand_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Permohonan Warga Perlu Tindakan"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_rtrw_badge_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Ada surat pengantar menunggu tanda tangan digital Anda."
+                        android:textColor="#DCEEFB"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
             <!-- Hero Banner Card -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -211,6 +308,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tv_active_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="1 pengajuan aktif"
@@ -218,6 +316,20 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
+
+            <!-- Empty state when no submissions -->
+            <TextView
+                android:id="@+id/tv_empty_submissions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_rounded_card"
+                android:gravity="center"
+                android:padding="24dp"
+                android:text="Belum ada pengajuan surat aktif.\nTekan tombol 'Ajukan surat' untuk memulai."
+                android:textColor="@color/text_muted"
+                android:textSize="13sp"
+                android:visibility="gone" />
 
             <!-- Status Card: Surat Keterangan Domisili -->
             <LinearLayout
@@ -253,6 +365,7 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tv_main_letter_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Surat Keterangan Domisili"
@@ -261,6 +374,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tv_main_letter_sub"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
@@ -283,6 +397,7 @@
                     android:orientation="horizontal">
 
                     <TextView
+                        android:id="@+id/tv_main_letter_badge"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_status_badge"
@@ -294,6 +409,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tv_main_letter_date"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"

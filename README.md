@@ -63,6 +63,22 @@ flowchart TD
 - **UI & Layouts:** Material Components 3 (`com.google.android.material:material:1.12.0`), `ConstraintLayout 2.2.0`, AndroidX Core KTX, AndroidX AppCompat
 - **Animations:** Airbnb Lottie Android (`com.airbnb.android:lottie:6.6.2`)
 - **Build System:** Gradle 8.11.1 dengan Kotlin DSL (`build.gradle.kts`) dan Version Catalog (`gradle/libs.versions.toml`)
+- **Networking & API:** Retrofit 2 (`2.11.0`), Gson Converter (`2.11.0`), OkHttp Logging Interceptor (`4.12.0`)
+- **QR Code Engine:** ZXing Core (`3.5.3`)
+- **Digital Signature:** Custom Android Canvas Touch View (`SignatureView.kt`)
+- **Backend Service:** PHP & MySQL XAMPP REST API (Folder `backend_api/` & `C:\xampp\htdocs\api_sipantas/`)
+
+---
+
+## 🏛️ Fitur Utama, Database & REST API (Lengkap)
+
+Untuk dokumentasi lengkap arsitektur backend, skema database, spesifikasi seluruh endpoint REST API, alur bisnis proses digital (TTD Kanvas RT/RW, Verifikasi QR Code, Relokasi Domisili, dsb.), silakan buka:
+👉 **[DOKUMENTASI_FITUR_DAN_API.md](DOKUMENTASI_FITUR_DAN_API.md)**
+
+### Ringkasan Fitur Unggulan:
+1. **Untuk Warga:** Registrasi mandiri NIK 16-digit, upload berkas (maks 2MB), pemilihan wilayah berjenjang, tujuan surat (KTP Asli / Tempat Kos untuk penduduk sementara), permohonan pindah domisili, banner status akun real-time (*Menunggu Verifikasi*, *Proses Pindah*, *Aktif*), ganti password mandiri.
+2. **Untuk RT / RW:** Verifikasi pendaftar baru, persetujuan surat dengan **Digital Signature Canvas (Tanda Tangan Layar Sentuh)**, penolakan surat dengan **alasan wajib**, badge notifikasi permohonan masuk, persetujuan pelepasan/penerimaan warga pindah.
+3. **Untuk Kecamatan & Admin:** Pengesahan surat resmi tingkat kecamatan, penerbitan **Kode Verifikasi QR Resmi SIPANTAS**, pelacakan **Jejak Audit (Audit Log)** lengkap dari awal hingga selesai, dashboard statistik pengajuan per jenis dan per kelurahan, manajemen loket/antrean, dan reset password akun RT/RW.
 
 ---
 

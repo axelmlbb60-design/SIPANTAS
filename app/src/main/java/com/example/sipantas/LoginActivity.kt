@@ -1,26 +1,39 @@
 package com.example.sipantas
 
+import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.sipantas.data.ApiResponse
+import com.example.sipantas.data.SessionManager
+import com.example.sipantas.data.UserModel
+import com.example.sipantas.network.ApiClient
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class LoginActivity : AppCompatActivity() {
 
     private var currentRole: String = "Warga"
+    private lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_login)
+
+        sessionManager = SessionManager(this)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.login_root)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -62,22 +75,131 @@ class LoginActivity : AppCompatActivity() {
         }
 
         findViewById<TextView>(R.id.tv_forgot_password).setOnClickListener {
-            Toast.makeText(this, "Petunjuk pemulihan akan dikirim ke nomor/email Anda.", Toast.LENGTH_SHORT).show()
+            showServerIpDialog()
         }
 
         val etIdentifier = findViewById<TextInputEditText>(R.id.et_identifier)
         val etPassword = findViewById<TextInputEditText>(R.id.et_password)
 
-        findViewById<MaterialButton>(R.id.btn_login).setOnClickListener {
-            val identifier = etIdentifier.text?.toString()?.trim()
-            val password = etPassword.text?.toString()?.trim()
-
-            // For quick demo/preview convenience:
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("EXTRA_USER_NAME", if (!identifier.isNullOrBlank()) identifier else "Budi Santoso")
-            intent.putExtra("EXTRA_ROLE", currentRole)
-            startActivity(intent)
-            finishAffinity()
+        // Pre-fill demo accounts for instant ease of testing
+        when (currentRole.lowercase()) {
+            "warga" -> {
+                etIdentifier.setText("7371010101010001")
+                etPassword.setText("warga123")
+            }
+            "rt / rw", "rtrw" -> {
+                etIdentifier.setText("7371010202020001")
+                etPassword.setText("rtrw123")
+            }
+            "petugas kelurahan", "kecamatan" -> {
+                etIdentifier.setText("7371010303030001")
+                etPassword.setText("kecamatan123")
+            }
+            "admin sistem", "admin" -> {
+                etIdentifier.setText("7371010404040001")
+                etPassword.setText("admin123")
+            }
         }
+
+        findViewById<MaterialButton>(R.id.btn_login).setOnClickListener {
+            val identifier = etIdentifier.text?.toString()?.trim() ?: ""
+            val password = etPassword.text?.toString()?.trim() ?: ""
+
+            if (identifier.isBlank()) {
+                etIdentifier.error = "NIK / Nomor Pegawai wajib diisi"
+                return@setOnClickListener
+            }
+            if (password.isBlank()) {
+                etPassword.error = "Kata sandi wajib diisi"
+                return@setOnClickListener
+            }
+
+            performLogin(identifier, password)
+        }
+    }
+
+    private fun performLogin(nik: String, pass: String) {
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("Menghubungkan ke server SIPANTAS...")
+            setCancelable(false)
+            show()
+        }
+
+        val apiService = ApiClient.getService(this)
+        apiService.login(nik, pass).enqueue(object : Callback<ApiResponse<UserModel>> {
+            override fun onResponse(
+                call: Call<ApiResponse<UserModel>>,
+                response: Response<ApiResponse<UserModel>>
+            ) {
+                progressDialog.dismiss()
+                val body = response.body()
+
+                if (response.isSuccessful && body != null && body.success && body.data != null) {
+                    val user = body.data
+                    sessionManager.saveUserSession(user)
+
+                    Toast.makeText(this@LoginActivity, "Selamat datang, ${user.namaLengkap}!", Toast.LENGTH_SHORT).show()
+
+                    val intent = Intent(this@LoginActivity, MainActivity::class.java).apply {
+                        putExtra("EXTRA_USER_NAME", user.namaLengkap)
+                        putExtra("EXTRA_ROLE", user.role.replaceFirstChar { it.uppercase() })
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                    startActivity(intent)
+                    finish()
+                } else {
+                    val errMsg = body?.message ?: "Gagal masuk. Periksa kembali NIK dan password Anda."
+                    showErrorDialog("Gagal Masuk", errMsg)
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse<UserModel>>, t: Throwable) {
+                progressDialog.dismiss()
+                showOfflineOptionsDialog(t.localizedMessage ?: "Tidak dapat menghubungi server.")
+            }
+        })
+    }
+
+    private fun showErrorDialog(title: String, message: String) {
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showOfflineOptionsDialog(errorDetail: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Koneksi Server Terputus")
+            .setMessage("Aplikasi tidak dapat terhubung ke REST API di:\n${sessionManager.getBaseUrl()}\n\nDetail: $errorDetail\n\nPastikan Apache & MySQL di XAMPP aktif. Anda juga dapat mengubah IP Server jika menguji di HP fisik.")
+            .setPositiveButton("Ubah URL Server") { _, _ ->
+                showServerIpDialog()
+            }
+            .setNegativeButton("Tutup", null)
+            .show()
+    }
+
+    private fun showServerIpDialog() {
+        val input = EditText(this).apply {
+            setText(sessionManager.getBaseUrl())
+            setSelection(text.length)
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Pengaturan REST API Server")
+            .setMessage("Masukkan base URL server SIPANTAS (Contoh:\nEmulator: http://10.0.2.2/api_sipantas/\nHP Fisik: http://192.168.1.X/api_sipantas/):")
+            .setView(input)
+            .setPositiveButton("Simpan") { _, _ ->
+                val newUrl = input.text.toString().trim()
+                if (newUrl.isNotBlank()) {
+                    sessionManager.setBaseUrl(newUrl)
+                    Toast.makeText(this, "Base URL disimpan: ${sessionManager.getBaseUrl()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNeutralButton("Reset Default") { _, _ ->
+                sessionManager.setBaseUrl(SessionManager.DEFAULT_BASE_URL)
+                Toast.makeText(this, "Reset ke: ${SessionManager.DEFAULT_BASE_URL}", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 }

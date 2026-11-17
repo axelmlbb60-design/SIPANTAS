@@ -23,4 +23,8 @@
     <color name="status_pending_light">#FEF3C7</color>
     <color name="status_success">#16A34A</color>
     <color name="status_success_light">#DCFCE7</color>
+    <color name="status_danger">#DC2626</color>
+    <color name="status_danger_light">#FEE2E2</color>
+    <color name="status_info">#0284C7</color>
+    <color name="status_info_light">#E0F2FE</color>
 </resources>

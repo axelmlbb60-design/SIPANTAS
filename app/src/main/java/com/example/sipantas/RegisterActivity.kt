@@ -1,19 +1,42 @@
 package com.example.sipantas
 
+import android.app.ProgressDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.sipantas.data.ApiResponse
+import com.example.sipantas.data.SessionManager
+import com.example.sipantas.data.UserModel
+import com.example.sipantas.data.WilayahItem
+import com.example.sipantas.network.ApiClient
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
+import java.io.FileOutputStream
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -32,6 +55,24 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var etFullName: TextInputEditText
     private lateinit var etNik: TextInputEditText
     private lateinit var etPhone: TextInputEditText
+    private lateinit var etPassword: TextInputEditText
+    private lateinit var etAddress: TextInputEditText
+    private lateinit var tvUploadStatus: TextView
+
+    private var selectedKtpUri: Uri? = null
+    private var selectedKtpFile: File? = null
+
+    // Wilayah selections
+    private var selectedKecamatanId: Int = 1
+    private var selectedKelurahanId: Int = 1
+    private var selectedRwId: Int = 1
+    private var selectedRtId: Int = 1
+
+    private val selectKtpLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        if (uri != null) {
+            handleKtpFileSelection(uri)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +98,9 @@ class RegisterActivity : AppCompatActivity() {
         etFullName = findViewById(R.id.et_full_name)
         etNik = findViewById(R.id.et_nik)
         etPhone = findViewById(R.id.et_phone)
+        etPassword = findViewById(R.id.et_register_password)
+        etAddress = findViewById(R.id.et_address)
+        tvUploadStatus = findViewById(R.id.tv_upload_ktp_status)
 
         findViewById<ImageView>(R.id.btn_back).setOnClickListener {
             handleBackPress()
@@ -67,8 +111,7 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.btn_upload_ktp).setOnClickListener {
-            findViewById<TextView>(R.id.tv_upload_ktp_status).text = "✓ Berkas KTP berhasil dipilih (ktp_warga.jpg)"
-            Toast.makeText(this, "Foto KTP dipilih", Toast.LENGTH_SHORT).show()
+            selectKtpLauncher.launch("*/*")
         }
 
         tvLoginLink.setOnClickListener {
@@ -79,35 +122,189 @@ class RegisterActivity : AppCompatActivity() {
         btnAction.setOnClickListener {
             handleNextStep()
         }
+
+        // Initialize default demo values
+        etFullName.setText("Budi Santoso")
+        etNik.setText("7371010101010001")
+        etPhone.setText("081234567890")
+        etPassword.setText("warga123")
+        etAddress.setText("Jl. Perintis Kemerdekaan No. 45, RT 03 / RW 02")
+    }
+
+    private fun handleKtpFileSelection(uri: Uri) {
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        var fileName = "berkas_ktp"
+        var fileSize = 0L
+
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
+                if (nameIndex != -1) fileName = it.getString(nameIndex)
+                if (sizeIndex != -1) fileSize = it.getLong(sizeIndex)
+            }
+        }
+
+        // Validate max 2MB as required
+        val maxSizeBytes = 2 * 1024 * 1024
+        if (fileSize > maxSizeBytes) {
+            Toast.makeText(this, "Ukuran berkas melebihi batas maksimal 2MB!", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        try {
+            val inputStream = contentResolver.openInputStream(uri)
+            val tempFile = File(cacheDir, "ktp_upload_" + System.currentTimeMillis() + "_" + fileName)
+            val outputStream = FileOutputStream(tempFile)
+            inputStream?.copyTo(outputStream)
+            inputStream?.close()
+            outputStream.close()
+
+            selectedKtpFile = tempFile
+            selectedKtpUri = uri
+            tvUploadStatus.text = "✓ Berkas terpilih: $fileName (${fileSize / 1024} KB)"
+            Toast.makeText(this, "Dokumen KTP siap diunggah", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Gagal membaca berkas: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun handleNextStep() {
         when (currentStep) {
             1 -> {
-                val name = etFullName.text?.toString()?.trim()
-                if (name.isNullOrBlank()) {
+                val name = etFullName.text?.toString()?.trim() ?: ""
+                val nik = etNik.text?.toString()?.trim() ?: ""
+                val phone = etPhone.text?.toString()?.trim() ?: ""
+                val pass = etPassword.text?.toString()?.trim() ?: ""
+
+                if (name.isBlank()) {
                     etFullName.error = "Nama lengkap wajib diisi"
                     return
                 }
+                // Validasi NIK 16 digit sesuai spesifikasi
+                if (nik.length != 16 || !nik.all { it.isDigit() }) {
+                    etNik.error = "NIK harus tepat 16 digit angka"
+                    Toast.makeText(this, "Validasi Gagal: NIK wajib 16 digit!", Toast.LENGTH_SHORT).show()
+                    return
+                }
+                if (phone.length < 10) {
+                    etPhone.error = "Nomor ponsel minimal 10 digit"
+                    return
+                }
+                if (pass.length < 6) {
+                    etPassword.error = "Kata sandi minimal 6 karakter"
+                    return
+                }
+
                 currentStep = 2
                 updateStepUI()
             }
             2 -> {
+                val address = etAddress.text?.toString()?.trim() ?: ""
+                if (address.isBlank()) {
+                    etAddress.error = "Alamat lengkap wajib diisi"
+                    return
+                }
                 currentStep = 3
                 updateStepUI()
             }
             3 -> {
+                submitRegistration()
+            }
+            4 -> {
+                val intent = Intent(this, MainActivity::class.java).apply {
+                    putExtra("EXTRA_USER_NAME", etFullName.text?.toString()?.trim() ?: "Budi Santoso")
+                    putExtra("EXTRA_ROLE", "Warga")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                startActivity(intent)
+                finish()
+            }
+        }
+    }
+
+    private fun submitRegistration() {
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("Mendaftarkan akun ke sistem SIPANTAS...")
+            setCancelable(false)
+            show()
+        }
+
+        val name = etFullName.text?.toString()?.trim() ?: ""
+        val nik = etNik.text?.toString()?.trim() ?: ""
+        val phone = etPhone.text?.toString()?.trim() ?: ""
+        val pass = etPassword.text?.toString()?.trim() ?: ""
+        val address = etAddress.text?.toString()?.trim() ?: ""
+
+        val apiService = ApiClient.getService(this)
+
+        val nikPart = ApiClient.createPartFromString(nik)
+        val namePart = ApiClient.createPartFromString(name)
+        val passPart = ApiClient.createPartFromString(pass)
+        val phonePart = ApiClient.createPartFromString(phone)
+        val rolePart = ApiClient.createPartFromString("warga")
+        val tipePart = ApiClient.createPartFromString("tetap")
+        val alamatKtpPart = ApiClient.createPartFromString(address)
+        val alamatDomisiliPart = ApiClient.createPartFromString(address)
+        val kecPart = ApiClient.createPartFromString(selectedKecamatanId.toString())
+        val kelPart = ApiClient.createPartFromString(selectedKelurahanId.toString())
+        val rwPart = ApiClient.createPartFromString(selectedRwId.toString())
+        val rtPart = ApiClient.createPartFromString(selectedRtId.toString())
+
+        var fotoPart: MultipartBody.Part? = null
+        selectedKtpFile?.let { file ->
+            val reqFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            fotoPart = MultipartBody.Part.createFormData("foto_ktp", file.name, reqFile)
+        }
+
+        apiService.register(
+            nik = nikPart,
+            nama = namePart,
+            pass = passPart,
+            email = null,
+            noHp = phonePart,
+            role = rolePart,
+            tipePenduduk = tipePart,
+            alamatKtp = alamatKtpPart,
+            alamatDomisili = alamatDomisiliPart,
+            kecId = kecPart,
+            kelId = kelPart,
+            rwId = rwPart,
+            rtId = rtPart,
+            fotoKtp = fotoPart
+        ).enqueue(object : Callback<ApiResponse<UserModel>> {
+            override fun onResponse(
+                call: Call<ApiResponse<UserModel>>,
+                response: Response<ApiResponse<UserModel>>
+            ) {
+                progressDialog.dismiss()
+                val body = response.body()
+
+                if (response.isSuccessful && body != null && body.success && body.data != null) {
+                    val user = body.data
+                    SessionManager(this@RegisterActivity).saveUserSession(user)
+                    currentStep = 4
+                    updateStepUI()
+                    Toast.makeText(this@RegisterActivity, "Pendaftaran berhasil dikirim!", Toast.LENGTH_SHORT).show()
+                } else {
+                    val msg = body?.message ?: "Gagal registrasi. Pastikan NIK belum pernah terdaftar."
+                    AlertDialog.Builder(this@RegisterActivity)
+                        .setTitle("Registrasi Ditolak")
+                        .setMessage(msg)
+                        .setPositiveButton("OK", null)
+                        .show()
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse<UserModel>>, t: Throwable) {
+                progressDialog.dismiss()
+                // If offline / demo mode fallback
+                Toast.makeText(this@RegisterActivity, "Server Offline: Melanjutkan ke halaman verifikasi lokal.", Toast.LENGTH_LONG).show()
                 currentStep = 4
                 updateStepUI()
             }
-            4 -> {
-                val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("EXTRA_USER_NAME", etFullName.text?.toString()?.ifBlank { "Budi Santoso" } ?: "Budi Santoso")
-                intent.putExtra("EXTRA_ROLE", "Warga")
-                startActivity(intent)
-                finishAffinity()
-            }
-        }
+        })
     }
 
     private fun handleBackPress() {
