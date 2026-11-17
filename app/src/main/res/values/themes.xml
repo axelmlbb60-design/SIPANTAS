@@ -3,10 +3,13 @@
     <style name="Base.Theme.SIPANTAS" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/brand_primary</item>
-        <item name="colorSecondary">@color/brand_accent</item>
+        <item name="colorSecondary">@color/brand_primary</item>
         <item name="android:windowBackground">@color/bg_page</item>
         <item name="android:statusBarColor">@color/bg_page</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.SIPANTAS.Button.Text</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.SIPANTAS.Button.Text</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.SIPANTAS.Button.Text</item>
     </style>
 
     <style name="Theme.SIPANTAS" parent="Base.Theme.SIPANTAS" />
@@ -17,5 +20,32 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@color/white</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+    </style>
+
+    <!-- Custom Button Styles for SIPANTAS (Blue) -->
+    <style name="Widget.SIPANTAS.Button.Primary" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/brand_primary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+
+    <style name="Widget.SIPANTAS.Button.Secondary" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/btn_secondary_bg</item>
+        <item name="android:textColor">@color/brand_primary</item>
+        <item name="strokeColor">@color/brand_primary</item>
+        <item name="strokeWidth">1.5dp</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+
+    <style name="Widget.SIPANTAS.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">@color/brand_primary</item>
+        <item name="strokeColor">@color/brand_primary</item>
+        <item name="strokeWidth">1.5dp</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+
+    <style name="Widget.SIPANTAS.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/brand_primary</item>
+        <item name="rippleColor">@color/brand_primary_light</item>
     </style>
 </resources>

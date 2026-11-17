@@ -131,3 +131,15 @@ data class QrVerificationData(
     @SerializedName("tanggal_pengesahan") val tanggalPengesahan: String? = null,
     @SerializedName("qr_token") val qrToken: String? = null
 ) : Serializable
+
+data class NotificationItem(
+    @SerializedName("id") val id: Int,
+    @SerializedName("user_id") val userId: Int,
+    @SerializedName("judul") val judul: String,
+    @SerializedName("pesan") val pesan: String,
+    @SerializedName("tipe") val tipe: String? = "info",
+    @SerializedName("data_id") val dataId: Int? = 0,
+    @SerializedName("is_read") val isRead: Int = 0,
+    @SerializedName("created_at") val createdAt: String? = null,
+    @SerializedName("waktu_lalu") val waktuLalu: String? = null
+) : Serializable

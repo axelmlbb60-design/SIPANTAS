@@ -190,4 +190,36 @@ interface ApiService {
         @Field("user_id") userId: Int,
         @Field("fcm_token") token: String
     ): Call<ApiResponse<Map<String, Any>>>
+
+    // Pemulihan Kata Sandi (Screen 11)
+    @FormUrlEncoded
+    @POST("forgot_password.php")
+    fun forgotPassword(
+        @Field("identifier") identifier: String
+    ): Call<ApiResponse<Map<String, Any>>>
+
+    // Registrasi & Aktivasi Akun Petugas (Screens 8, 9, 10)
+    @FormUrlEncoded
+    @POST("register_officer.php")
+    fun registerOfficer(
+        @Field("role") role: String,
+        @Field("kode_undangan") kode: String,
+        @Field("nama_lengkap") nama: String,
+        @Field("no_hp") noHp: String,
+        @Field("email") email: String,
+        @Field("password") pass: String,
+        @Field("nip") nip: String? = null,
+        @Field("sk_pengangkatan") sk: String? = null,
+        @Field("kelurahan_id") kelId: Int? = null,
+        @Field("rw_id") rwId: Int? = null,
+        @Field("rt_id") rtId: Int? = null
+    ): Call<ApiResponse<Map<String, Any>>>
+
+    // Pusat Notifikasi (Screen 24)
+    @GET("get_notifications.php")
+    fun getNotifications(
+        @Query("user_id") userId: Int,
+        @Query("filter") filter: String? = null,
+        @Query("action") action: String? = null
+    ): Call<ApiResponse<List<NotificationItem>>>
 }

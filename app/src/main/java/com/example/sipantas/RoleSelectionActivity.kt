@@ -33,16 +33,42 @@ class RoleSelectionActivity : AppCompatActivity() {
         }
 
         val onRoleClickListener = View.OnClickListener { v ->
-            val roleName = when (v.id) {
-                R.id.role_warga -> "Warga"
-                R.id.role_rt_rw -> "RT / RW"
-                R.id.role_kelurahan -> "Petugas Kelurahan"
-                R.id.role_admin -> "Admin Sistem"
+            val roleKey = when (v.id) {
+                R.id.role_warga -> "warga"
+                R.id.role_rt_rw -> "rtrw"
+                R.id.role_kelurahan -> "kelurahan"
+                R.id.role_admin -> "admin"
+                else -> "warga"
+            }
+            val roleTitle = when (roleKey) {
+                "warga" -> "Warga"
+                "rtrw" -> "RT / RW"
+                "kelurahan" -> "Petugas Kelurahan"
+                "admin" -> "Admin Sistem"
                 else -> "Warga"
             }
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.putExtra("EXTRA_SELECTED_ROLE", roleName)
-            startActivity(intent)
+
+            if (roleKey == "warga") {
+                val intent = Intent(this, LoginActivity::class.java)
+                intent.putExtra("EXTRA_SELECTED_ROLE", roleTitle)
+                startActivity(intent)
+            } else {
+                androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Akses $roleTitle")
+                    .setMessage("Pilih tindakan untuk akun $roleTitle:")
+                    .setPositiveButton("Masuk") { _, _ ->
+                        val intent = Intent(this, LoginActivity::class.java)
+                        intent.putExtra("EXTRA_SELECTED_ROLE", roleTitle)
+                        startActivity(intent)
+                    }
+                    .setNeutralButton("Aktivasi Akun Baru") { _, _ ->
+                        val intent = Intent(this, RegisterOfficerActivity::class.java)
+                        intent.putExtra("EXTRA_ROLE", roleKey)
+                        startActivity(intent)
+                    }
+                    .setNegativeButton("Batal", null)
+                    .show()
+            }
         }
 
         findViewById<View>(R.id.role_warga).setOnClickListener(onRoleClickListener)

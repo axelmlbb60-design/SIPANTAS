@@ -137,6 +137,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        findViewById<View>(R.id.btn_notification_bell)?.setOnClickListener {
+            startActivity(Intent(this, NotificationActivity::class.java))
+        }
+
         // Bottom Navigation Bar Clicks
         findViewById<View>(R.id.nav_beranda).setOnClickListener {
             // Already on Beranda
@@ -147,7 +151,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.nav_kabar).setOnClickListener {
-            Toast.makeText(this, "Kabar Wilayah: Layanan pembuatan dokumen digital aktif 24 jam.", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, NotificationActivity::class.java))
         }
 
         findViewById<View>(R.id.nav_bantuan).setOnClickListener {
@@ -188,6 +192,30 @@ class MainActivity : AppCompatActivity() {
                             }
                         )
 
+                        bannerRtrw.setOnClickListener {
+                            val intent = Intent(this@MainActivity, LetterDetailActivity::class.java).apply {
+                                putExtra("EXTRA_PENGAJUAN_ID", list[0].id)
+                                putExtra("EXTRA_SERVICE_NAME", list[0].jenisSurat)
+                            }
+                            startActivity(intent)
+                        }
+                    } else {
+                        bannerRtrw.visibility = View.GONE
+                    }
+                }
+                override fun onFailure(call: Call<ApiResponse<List<PengajuanItem>>>, t: Throwable) {
+                    bannerRtrw.visibility = View.GONE
+                }
+            })
+        } else if (role == "kecamatan") {
+            apiService.getPengajuanList(status = "menunggu_kecamatan").enqueue(object : Callback<ApiResponse<List<PengajuanItem>>> {
+                override fun onResponse(call: Call<ApiResponse<List<PengajuanItem>>>, response: Response<ApiResponse<List<PengajuanItem>>>) {
+                    val list = response.body()?.data ?: emptyList()
+                    val count = list.size
+                    if (count > 0) {
+                        bannerRtrw.visibility = View.VISIBLE
+                        tvRtrwCount.text = count.toString()
+                        tvRtrwDesc.text = "Ada $count surat warga siap disahkan & diterbitkan QR Code resmi Kelurahan."
                         bannerRtrw.setOnClickListener {
                             val intent = Intent(this@MainActivity, LetterDetailActivity::class.java).apply {
                                 putExtra("EXTRA_PENGAJUAN_ID", list[0].id)

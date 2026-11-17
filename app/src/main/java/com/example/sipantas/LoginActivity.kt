@@ -75,7 +75,12 @@ class LoginActivity : AppCompatActivity() {
         }
 
         findViewById<TextView>(R.id.tv_forgot_password).setOnClickListener {
+            val intent = Intent(this, ForgotPasswordActivity::class.java)
+            startActivity(intent)
+        }
+        findViewById<TextView>(R.id.tv_forgot_password).setOnLongClickListener {
             showServerIpDialog()
+            true
         }
 
         val etIdentifier = findViewById<TextInputEditText>(R.id.et_identifier)

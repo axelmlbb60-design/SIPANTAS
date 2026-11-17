@@ -65,7 +65,10 @@ class ServiceListActivity : AppCompatActivity() {
                 R.id.item_sku -> "Surat Keterangan Usaha"
                 else -> "Surat Keterangan Domisili"
             }
-            showApplyDialog(serviceTitle)
+            val intent = Intent(this, ApplyLetterActivity::class.java).apply {
+                putExtra("EXTRA_LETTER_TYPE", serviceTitle)
+            }
+            startActivity(intent)
         }
 
         findViewById<View>(R.id.item_domisili).setOnClickListener(onSelectService)

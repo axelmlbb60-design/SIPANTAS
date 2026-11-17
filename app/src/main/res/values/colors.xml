@@ -10,6 +10,14 @@
     <color name="brand_accent">#48A27A</color>
     <color name="brand_accent_light">#EAF6F0</color>
     
+    <!-- Button Specific Blue Themes -->
+    <color name="btn_secondary_bg">#EBF5FB</color>
+    <color name="btn_secondary_stroke">#195685</color>
+    <color name="btn_secondary_text">#195685</color>
+    <color name="btn_secondary_pressed">#D0E7F7</color>
+    <color name="btn_outlined_stroke">#195685</color>
+    <color name="btn_outlined_text">#195685</color>
+    
     <!-- Neutrals & Backgrounds -->
     <color name="bg_page">#F8FAFC</color>
     <color name="card_bg">#FFFFFFFF</color>
