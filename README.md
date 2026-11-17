@@ -1,68 +1,161 @@
-# SIPANTAS — Sistem Pelayanan Administrasi Terpadu Antar Sektor
+# 🏛️ SIPANTAS — Sistem Informasi Pelayanan Administrasi Warga dan Rukun Tetangga
 
-Aplikasi mobile Android modern untuk digitalisasi dan efisiensi birokrasi pelayanan warga di tingkat lingkungan (RT / RW) dan kantor kelurahan. Warga dapat mengajukan permohonan surat kependudukan secara mandiri, memantau proses verifikasi secara real-time, memesan tiket antrean kantor kelurahan, serta menyampaikan laporan kendala lingkungan dari mana saja.
+Aplikasi mobile Android modern untuk digitalisasi dan efisiensi birokrasi pelayanan warga di tingkat lingkungan (**RT / RW**) dan kantor **Kelurahan**. Warga dapat mengajukan permohonan surat kependudukan secara mandiri, memantau proses verifikasi secara real-time, memesan tiket antrean kantor kelurahan, serta menyampaikan laporan kendala lingkungan dari mana saja secara paperless.
 
----
-
-## 📱 Daftar Halaman & Alur Aplikasi
-
-Aplikasi dibangun dengan arsitektur multi-activity terstruktur dan navigasi edge-to-edge:
-
-```mermaid
-flowchart TD
-    Splash[SplashActivity<br/>Animasi Lottie Logo] --> Welcome[WelcomeActivity<br/>Halaman Selamat Datang]
-    Welcome -->|Mulai Sekarang| RoleSelect[RoleSelectionActivity<br/>Pilih Peran Pengguna]
-    Welcome -->|Sudah Punya Akun| Login[LoginActivity<br/>Masuk Akun]
-    
-    RoleSelect -->|Pilih Peran: Warga / RTRW / Kelurahan / Admin| Login
-    RoleSelect -->|Belum terdaftar? Daftar| Register[RegisterActivity<br/>Formulir Pendaftaran 4 Tahap]
-    
-    Login -->|Belum punya akun?| Register
-    Login -->|Ganti Peran| RoleSelect
-    Login -->|Login Sukses| Main[MainActivity<br/>Beranda & Dashboard Layanan]
-    
-    Register -->|Pendaftaran Selesai| Main
-    Register -->|Sudah punya akun? Masuk| Login
-    
-    Main -->|Ajukan Surat / Tab Pengajuan| Services[ServiceListActivity<br/>Katalog Surat & Pengantar]
-    Main -->|Pesan Kunjungan| Queue[QueueActivity<br/>Pemesanan Nomor Antrean]
-    Main -->|Lapor Warga| Report[ReportActivity<br/>Formulir Aduan Lingkungan]
-    Main -->|Klik Kartu Pengajuan Aktif| LetterDetail[LetterDetailActivity<br/>Pelacakan Status Berkas]
-    Main -->|Ikon Profil / Tab Bantuan| Profile[ProfileActivity<br/>Pengaturan Akun & Pusat Bantuan]
-    
-    Services -->|Pilih Jenis Surat| LetterDetail
-    Profile -->|Tentang Aplikasi| About[AboutActivity<br/>Informasi SIPANTAS]
-    Profile -->|Keluar dari Akun| Login
-```
-
-### Rincian Fitur Antarhalaman:
-1. **`SplashActivity`**: Menampilkan animasi logo SIPANTAS beresolusi tinggi dengan Lottie, dilengkapi fallback timeout dan tap-to-skip langsung ke halaman selamat datang.
-2. **`WelcomeActivity`**: Halaman pengenalan fitur utama (pengajuan online, pelacakan proses, pusat bantuan) serta tombol ajakan registrasi atau masuk.
-3. **`RoleSelectionActivity`**: Pemilihan peran pengguna (*Warga*, *RT / RW*, *Petugas Kelurahan*, dan *Admin Sistem*) yang meneruskan konteks peran ke halaman login, serta link langsung ke registrasi warga.
-4. **`LoginActivity`**: Formulir autentikasi pengguna dengan indikator chip peran yang aktif, tombol ganti peran, validasi input, dan opsi registrasi.
-5. **`RegisterActivity`**: Wizard pendaftaran interaktif 4 langkah:
-   - **Langkah 1:** Data Pribadi (Nama, NIK, No. HP).
-   - **Langkah 2:** Alamat & Unggah Foto KTP.
-   - **Langkah 3:** Keamanan Akun & Verifikasi Kode OTP 6-Digit.
-   - **Langkah 4:** Konfirmasi status berhasil pendaftaran dan akses ke beranda.
-6. **`MainActivity`**: Dashboard beranda warga dengan ringkasan status berkas aktif, tombol cepat layanan, navigasi bawah (*Bottom Navigation Bar*), dan akses ke profil.
-7. **`ServiceListActivity`**: Daftar katalog surat resmi (Surat Keterangan Domisili, Surat Pengantar RT/RW, SKTM, dan Surat Keterangan Usaha).
-8. **`LetterDetailActivity`**: Informasi detail pengajuan surat, tracking timeline verifikasi RT/RW dan kelurahan, serta kontak bantuan petugas.
-9. **`QueueActivity`**: Pemesanan antrean pelayanan tatap muka di kantor kelurahan secara online.
-10. **`ReportActivity`**: Formulir laporan kendala lingkungan warga disertai lampiran bukti foto.
-11. **`ProfileActivity`**: Pengelolaan akun, data dokumen tersimpan, pengaturan keamanan, akses tentang aplikasi, dan fitur logout dengan konfirmasi dialog.
-12. **`AboutActivity`**: Informasi profil sistem, visi-misi layanan digital, dan hak cipta aplikasi SIPANTAS.
+* **Repositori GitHub:** [https://github.com/axelmlbb60-design/SIPANTAS](https://github.com/axelmlbb60-design/SIPANTAS)
+* **Branch:** `main`
+* **Status Build Android:** `BUILD SUCCESSFUL` (Kotlin 1.9.0 / Android SDK 34 / Java 11)
+* **Installer APK:** [app-debug.apk](app/build/outputs/apk/debug/app-debug.apk) (11.3 MB)
+* **Server REST API (Wi-Fi HP Fisik):** `http://192.168.1.38/api_sipantas/`
 
 ---
 
-## 🛠️ Tech Stack & Dependencies
+## 📌 Daftar Isi Dokumentasi
+1. [Pembuatan Fitur Utama](#1-pembuatan-fitur-utama)
+2. [Implementasi CRUD (Create, Read, Update, Delete)](#2-implementasi-crud-create-read-update-delete)
+3. [Basis Data (Database MySQL & phpMyAdmin)](#3-basis-data-database-mysql--phpmyadmin)
+4. [REST API (Backend PHP & Retrofit Android)](#4-rest-api-backend-php--retrofit-android)
+5. [Tech Stack & Arsitektur Sistem](#5-tech-stack--arsitektur-sistem)
+6. [Petunjuk Pengujian di HP Fisik](#6-petunjuk-pengujian-di-hp-fisik)
 
-- **Platform:** Android (Min SDK 24 / Android 7.0, Target & Compile SDK 35 / Android 15)
-- **Language:** Kotlin 2.0.21
+---
+
+## 1. Pembuatan Fitur Utama
+
+Sistem SIPANTAS mengintegrasikan alur birokrasi persuratan kependudukan secara berjenjang antara **Warga**, **Ketua RT/RW**, dan **Kelurahan/Kecamatan** secara real-time dan terotentikasi.
+
+### A. Pengajuan Surat Mandiri oleh Warga
+Warga dapat mengajukan 4 jenis surat kependudukan:
+* **Surat Keterangan Domisili** (Keterangan tinggal tetap/sementara)
+* **Surat Pengantar RT / RW** (Pengantar resmi kepengurusan kantor kelurahan)
+* **Surat Keterangan Tidak Mampu (SKTM)** (Bantuan sosial, KIP, beasiswa)
+* **Surat Keterangan Usaha (SKU)** (Legalitas usaha mikro & pengajuan KUR)
+
+Tab **Pengajuan** dirancang interaktif: langsung menampilkan daftar riwayat surat aktif beserta status berjalannya (*Menunggu TTD RT*, *Menunggu Kelurahan*, *Selesai & Terbit*), dan katalog pembuatan surat baru dapat dibuka/tutup dengan mudah via tombol **"+ Ajukan Permohonan Surat Baru"**.
+
+![01 Pengajuan Surat Warga](docs/screenshots/01_fitur_utama_pengajuan_warga.png)
+
+---
+
+### B. Otorisasi & Hak Akses Berbasis Role (RT/RW & Kelurahan)
+Sesuai aturan administrasi pemerintahan:
+* **Ketua RT/RW dan Petugas Kelurahan dilarang membuat surat permohonan warga** (katalog pembuatan surat dinonaktifkan/disembunyikan otomatis).
+* Tab **Pengajuan** bagi petugas otomatis beralih fungsi menjadi **Meja Verifikasi Surat Masuk**, menampilkan seluruh surat warga yang membutuhkan pemeriksaan data dan tindak lanjut.
+
+![02 Verifikasi RT/RW](docs/screenshots/02_fitur_utama_verifikasi_rtrw.png)
+
+---
+
+### C. Tanda Tangan Digital Elektronik (Canvas Digital Signature)
+Petugas RT/RW dapat memeriksa dokumen pemohon dan membubuhkan tanda tangan elektronik langsung di layar HP menggunakan kanvas sentuh interaktif. Goresan tanda tangan dikonversi menjadi berkas gambar PNG beresolusi tajam dan diunggah langsung ke server REST API backend melalui multipart request.
+
+![03 TTD Digital Canvas](docs/screenshots/03_fitur_utama_ttd_digital_canvas.png)
+
+---
+
+### D. Pengesahan Kelurahan & QR Code Autentikasi Dokumen
+Setelah surat disetujui RT/RW, berkas otomatis diteruskan ke Kelurahan/Kecamatan. Petugas Kelurahan mengesahkan surat dan menerbitkan **QR Code resmi ber-token kriptografis**. QR Code dapat dipindai oleh pihak ketiga (bank, instansi, kantor kepolisian) untuk memverifikasi keaslian surat tanpa perlu stempel basah.
+
+![04 Pengesahan QR](docs/screenshots/04_fitur_utama_pengesahan_kelurahan_qr.png)
+
+---
+
+### E. Bottom Navigation Bar Seragam
+Navigasi utama aplikasi distandarisasi menggunakan **4-Tab Bottom Navigation Bar** (*Beranda*, *Pengajuan*, *Kabar*, dan *Bantuan/Akun*) tanpa tombol panah kembali (*back button*) di header atas, memberikan alur navigasi yang konsisten di semua layar.
+
+---
+
+## 2. Implementasi CRUD (Create, Read, Update, Delete)
+
+Sistem SIPANTAS mengimplementasikan operasi CRUD secara menyeluruh pada setiap entitas modul:
+
+### A. CRUD Profil & Avatar Pengguna (Update & Read)
+Warga dan petugas dapat memperbarui data kontak dan domisili melalui dialog formulir terintegrasi, serta mengunggah foto profil dari galeri/kamera yang tersimpan langsung di server backend.
+* **Read:** Menampilkan profil, status akun terverifikasi, dan foto avatar profil pengguna.
+* **Update:** Endpoint `update_profile.php` memproses pembaruan nama, no HP, email, alamat domisili, dan upload berkas foto.
+
+![05 Ubah Profil dan Foto](docs/screenshots/05_crud_ubah_profil_dan_foto.png)
+
+---
+
+### B. CRUD Registrasi Warga Baru (Create) dengan RT & RW Terpisah
+Formulir registrasi warga menerapkan pemisahan input **Nomor RW** dan **Nomor RT** menjadi dua field tersendiri untuk menjamin akurasi pemetaan wilayah domisili di database. Form otomatis bersih dari teks contoh saat dibuka pertama kali dan dilengkapi toggle melihat kata sandi.
+
+![06 Registrasi RW dan RT](docs/screenshots/06_crud_form_registrasi_rw_rt.png)
+
+---
+
+### C. CRUD Aktivasi Akun Petugas dengan Wajib NIK (Create)
+Aktivasi akun petugas (Ketua RT, RW, dan Petugas Kelurahan) mewajibkan input **Nomor NIK 16 digit** dan kode undangan penugasan resmi sebagai lapisan autentikasi ganda sebelum diberikan hak akses verifikasi surat.
+
+![07 Aktivasi Petugas NIK](docs/screenshots/07_crud_aktivasi_petugas_nik.png)
+
+---
+
+### D. Matriks Operasi CRUD Modul Sistem
+
+| Modul Entitas | Create (C) | Read (R) | Update (U) | Delete (D) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Permohonan Surat** | Pengajuan surat baru & upload lampiran di `ApplyLetterActivity`. | Menampilkan daftar riwayat surat & detail surat ber-QR di `ServiceListActivity`. | TTD digital RT/RW & Pengesahan status kelurahan di `LetterDetailActivity`. | Pembatalan surat mandiri oleh pemohon sebelum diproses petugas. |
+| **Antrean Kelurahan** | Booking tiket antrean pelayanan (sesi pagi/siang) di `QueueActivity`. | Cek nomor antrean aktif & kuota tersisa secara real-time. | Panggilan nomor urut oleh petugas loket kelurahan. | Pembatalan tiket nomor antrean oleh warga. |
+| **Laporan Warga** | Kirim aduan/aspirasi warga + foto bukti di `ReportActivity`. | Monitoring progres tindak lanjut aduan warga. | Pembaruan status penanganan oleh satgas kelurahan. | Penutupan atau penghapusan berkas laporan yang telah selesai. |
+| **Akun & Sesi** | Pendaftaran warga & aktivasi petugas ber-NIK. | Auto-login sesi pengguna saat membuka aplikasi di `SplashActivity`. | Ubah data profil dan unggah avatar foto profil. | Logout / hapus sesi autentikasi perangkat. |
+
+---
+
+## 3. Basis Data (Database MySQL & phpMyAdmin)
+
+Basis data SIPANTAS dirancang menggunakan **MySQL 8.0** pada database `sipantas_db` melalui antarmuka **phpMyAdmin**, menerapkan integritas referensial dan pengindeksan performa tinggi.
+
+![08 Database MySQL phpMyAdmin](docs/screenshots/08_database_mysql_phpmyadmin.png)
+
+### Struktur Tabel Utama:
+1. **`users`**: Menyimpan kredensial pengguna, NIK (16 digit), role (`warga`, `rtrw`, `kecamatan`), wilayah (`rt_id`, `rw_id`, `kelurahan_id`), serta URL foto profil.
+2. **`pengajuan_surat`**: Menyimpan permohonan surat, nomor surat unik, status alur (`menunggu_rt`, `menunggu_kecamatan`, `selesai`, `ditolak`), path berkas tanda tangan RT (`uploads/ttd/`), dan token QR Code resmi.
+3. **`pengajuan_audit_logs`**: Menyimpan riwayat perubahan status, aktor penanggung jawab, catatan verifikasi, dan stempel waktu (*timestamp*).
+4. **`antrean`**: Menyimpan nomor antrean loket, tanggal kunjungan, sesi waktu, dan status kehadiran warga.
+5. **`notifikasi`**: Menyimpan riwayat notifikasi in-app untuk warga terkait pengajuan surat dan pengingat antrean H-1.
+6. **`wilayah_*`** (`kecamatan`, `kelurahan`, `rw`, `rt`): Menyimpan hierarki administratif kewilayahan Kota Makassar.
+
+---
+
+## 4. REST API (Backend PHP & Retrofit Android)
+
+Komunikasi antara aplikasi Android dan server backend menggunakan arsitektur **RESTful API** berbasis payload data **JSON**:
+
+### A. Pengujian Endpoint REST API
+Endpoint diuji menggunakan format respons standar `{ "success": true, "message": "...", "data": [...] }`. Seluruh endpoint backend dapat diakses secara lokal maupun nirkabel melalui IP Wi-Fi laptop (`http://192.168.1.38/api_sipantas/`).
+
+![09 REST API Testing JSON](docs/screenshots/09_rest_api_testing_json.png)
+
+### B. Daftar Endpoint REST API Utama:
+* `POST /api_sipantas/login.php` $\rightarrow$ Autentikasi NIK dan password akun.
+* `POST /api_sipantas/register.php` $\rightarrow$ Pendaftaran warga dengan Nomor RW dan RT terpisah.
+* `POST /api_sipantas/register_officer.php` $\rightarrow$ Aktivasi akun petugas berbasis kode registrasi dan NIK.
+* `POST /api_sipantas/update_profile.php` $\rightarrow$ Pembaruan profil & upload multipart foto profil.
+* `GET /api_sipantas/pengajuan_list.php` $\rightarrow$ Pengambilan daftar surat berdasarkan role dan filter status.
+* `GET /api_sipantas/pengajuan_detail.php` $\rightarrow$ Pengambilan detail surat lengkap dengan riwayat audit log.
+* `POST /api_sipantas/pengajuan_action_rt.php` $\rightarrow$ Upload gambar tanda tangan digital dan persetujuan RT/RW.
+* `POST /api_sipantas/pengajuan_action_kecamatan.php` $\rightarrow$ Pengesahan akhir dan pembuatan token QR Code.
+* `GET /api_sipantas/get_wilayah.php` $\rightarrow$ Pengambilan pohon hierarki wilayah administratif.
+* `GET /api_sipantas/get_notifications.php` $\rightarrow$ Pengambilan daftar notifikasi dan pengingat antrean.
+
+---
+
+### C. Version Control & Git Diff di Android Studio
+Setiap pembaruan kode tercatat dengan rapi di sistem kontrol versi Git Android Studio, memastikan integritas dan kemudahan pelacakan riwayat perubahan kode:
+
+![10 Android Studio Git Diff](docs/screenshots/10_android_studio_git_diff.png)
+
+---
+
+## 5. Tech Stack & Arsitektur Sistem
+
+- **Platform:** Android (Min SDK 24 / Android 7.0, Target & Compile SDK 34 / Android 14)
+- **Language:** Kotlin 1.9.0
 - **JVM Target:** Java 11
 - **UI & Layouts:** Material Components 3 (`com.google.android.material:material:1.12.0`), `ConstraintLayout 2.2.0`, AndroidX Core KTX, AndroidX AppCompat
 - **Animations:** Airbnb Lottie Android (`com.airbnb.android:lottie:6.6.2`)
-- **Build System:** Gradle 8.11.1 dengan Kotlin DSL (`build.gradle.kts`) dan Version Catalog (`gradle/libs.versions.toml`)
 - **Networking & API:** Retrofit 2 (`2.11.0`), Gson Converter (`2.11.0`), OkHttp Logging Interceptor (`4.12.0`)
 - **QR Code Engine:** ZXing Core (`3.5.3`)
 - **Digital Signature:** Custom Android Canvas Touch View (`SignatureView.kt`)
@@ -70,85 +163,17 @@ flowchart TD
 
 ---
 
-## 🏛️ Fitur Utama, Database & REST API (Lengkap)
+## 6. Petunjuk Pengujian di HP Fisik
 
-Untuk dokumentasi lengkap arsitektur backend, skema database, spesifikasi seluruh endpoint REST API, alur bisnis proses digital (TTD Kanvas RT/RW, Verifikasi QR Code, Relokasi Domisili, dsb.), silakan buka:
-👉 **[DOKUMENTASI_FITUR_DAN_API.md](DOKUMENTASI_FITUR_DAN_API.md)**
-
-### Ringkasan Fitur Unggulan:
-1. **Untuk Warga:** Registrasi mandiri NIK 16-digit, upload berkas (maks 2MB), pemilihan wilayah berjenjang, tujuan surat (KTP Asli / Tempat Kos untuk penduduk sementara), permohonan pindah domisili, banner status akun real-time (*Menunggu Verifikasi*, *Proses Pindah*, *Aktif*), ganti password mandiri.
-2. **Untuk RT / RW:** Verifikasi pendaftar baru, persetujuan surat dengan **Digital Signature Canvas (Tanda Tangan Layar Sentuh)**, penolakan surat dengan **alasan wajib**, badge notifikasi permohonan masuk, persetujuan pelepasan/penerimaan warga pindah.
-3. **Untuk Kecamatan & Admin:** Pengesahan surat resmi tingkat kecamatan, penerbitan **Kode Verifikasi QR Resmi SIPANTAS**, pelacakan **Jejak Audit (Audit Log)** lengkap dari awal hingga selesai, dashboard statistik pengajuan per jenis dan per kelurahan, manajemen loket/antrean, dan reset password akun RT/RW.
-
----
-
-## 📝 Dokumentasi Perubahan & Perbaikan yang Telah Dilakukan
-
-Berikut adalah rekapitulasi lengkap seluruh perbaikan teknis, konfigurasi, navigasi, dan aset visual yang telah dikerjakan di dalam repositori ini:
-
-### 1. Perbaikan Konfigurasi AndroidX (`gradle.properties`)
-- **Masalah:** Kompilasi gagal dengan `EvalIssueException: Configuration ':app:debugRuntimeClasspath' contains AndroidX dependencies, but the 'android.useAndroidX' property is not enabled`.
-- **Solusi:** Menambahkan properti `android.useAndroidX=true` pada file `gradle.properties` agar Gradle dapat menangani pustaka AndroidX dan Material 3 secara tepat.
-
-### 2. Eliminasi Duplikasi Resource Mipmap Launcher
-- **Masalah:** Terjadi konflik `Duplicate resources` pada task `:app:mergeDebugResources` antara file `.png` (logo SIPANTAS) dan file default template `.webp` (robot Android) di seluruh folder densitas `app/src/main/res/mipmap-*` (`hdpi`, `mdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`).
-- **Solusi:** Menghapus 10 file `.webp` template Android Studio dan mempertahankan icon resmi SIPANTAS berformat `.png`.
-
-### 3. Pembenahan Alur Tautan Registrasi
-- **Masalah:** Pada `RoleSelectionActivity`, tautan teks di bagian bawah `"Belum terdaftar? Daftar"` (`bottom_login_link`) keliru membuka `LoginActivity`.
-- **Solusi:** Mengubah listener klik pada `RoleSelectionActivity.kt` agar langsung membuka `RegisterActivity`, sehingga calon warga yang belum memiliki akun dapat langsung melakukan pendaftaran.
-
-### 4. Perbaikan Navigasi Kembali & Backstack Wizard Register
-- **Solusi:** Mengintegrasikan `onBackPressedDispatcher.addCallback` pada `RegisterActivity.kt`. Jika pengguna menekan tombol fisik/gesture kembali dari Android pada langkah 2 atau 3, aplikasi akan mundur ke langkah sebelumnya secara bertahap tanpa menutup form pendaftaran secara mendadak.
-
-### 5. Penyempurnaan Fitur Logout Akun
-- **Masalah:** Tombol logout di `ProfileActivity` sebelumnya mengarahkan pengguna ke `WelcomeActivity`.
-- **Solusi:** Memperbarui aksi dialog logout di `ProfileActivity.kt` agar mengarahkan pengguna kembali ke `LoginActivity` dengan flag `Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK` serta `finishAffinity()` untuk membersihkan tumpukan aktivitas (*backstack*), disertai pesan konfirmasi Toast `"Berhasil keluar dari akun"`.
-
-### 6. Penyelarasan Latar Belakang Splash Screen & Normalisasi Aset Logo
-- **Masalah:** Pada `SplashActivity`, background layar berwarna putih bersih (`#FFFFFF`), namun animasi Lottie di tengah layar (`splash_animation.json`) memiliki background studio abu-abu muda (`#E2E2E2` / RGB 226) bawaan render video dengan tepi kotak persegi (`1:1`). Akibatnya terlihat batas kotak abu-abu yang kontras dan tidak menyatu dengan layar.
-- **Solusi:**
-  - Memproses seluruh **158 frame WebP** di dalam `app/src/main/res/raw/splash_animation.json` menggunakan skrip otomatisasi grafis untuk menormalkan area latar belakang dan batas tepi menjadi putih bersih (`#FFFFFF`), sehingga animasi membaur 100% mulus dengan splash screen tanpa ada batas kotak terputus.
-  - Memperbarui file aset logo utama `app/src/main/res/drawable/ic_sipantas_logo.png` agar memiliki transparansi (*alpha channel*) penuh di bagian luar lingkaran logo, sehingga tampil bersih saat diletakkan di atas kartu/komponen berwarna apa pun.
-
----
-
-## 🚀 Cara Menjalankan Proyek
-
-### Menggunakan Android Studio
-1. Buka **Android Studio** (Koala / Ladybug atau versi yang lebih baru).
-2. Pilih **File > Open** dan arahkan ke folder proyek ini (`D:\TUGAS\SIPANTAS`).
-3. Tunggu hingga proses **Gradle Sync** selesai.
-4. Pilih target perangkat fisik (USB Debugging) atau Emulator (API 24 - 35).
-5. Klik tombol **Run 'app'** (ikon segitiga hijau) atau tekan `Shift + F10`.
-
-### Menggunakan Terminal / Command Line
-Untuk mengompilasi APK debug:
-```bash
-# Windows PowerShell / CMD
-.\gradlew assembleDebug
-
-# Linux / macOS
-./gradlew assembleDebug
-```
-File APK hasil build akan berada di:
-`app/build/outputs/apk/debug/app-debug.apk`
-
----
-
-## 🌐 Menghubungkan Repositori ke GitHub
-
-Untuk mengunggah (push) repositori ini ke akun GitHub Anda:
-
-1. Buat repositori baru di [GitHub](https://github.com/new) dengan nama **`SIPANTAS`** (pilih *Public* atau *Private*, jangan centang *Add a README file* karena repositori lokal sudah memilikinya).
-2. Jalankan perintah berikut di terminal:
-```bash
-# Tambahkan remote URL GitHub Anda
-git remote add origin https://github.com/axelmlbb60-design/SIPANTAS.git
-
-# Pastikan branch utama bernama main
-git branch -M main
-
-# Unggah seluruh commit ke GitHub
-git push -u origin main
-```
+1. **Pastikan Laptop & HP Terhubung ke Wi-Fi yang Sama:**
+   * IP Laptop: `192.168.1.38`
+   * IP HP: `192.168.1.x`
+2. **Pastikan Apache & MySQL di XAMPP Berstatus Aktif (Start).**
+3. **Instal Berkas APK:**
+   * Berkas [app-debug.apk](app/build/outputs/apk/debug/app-debug.apk) dapat langsung ditransfer ke HP fisik atau di-run via Android Studio (`Shift + F10`).
+4. **URL Server di Aplikasi:**
+   * Jika muncul dialog "Koneksi Server Terputus", klik **"Ubah URL Server"** dan masukkan:
+     ```text
+     http://192.168.1.38/api_sipantas/
+     ```
+   * Klik **Simpan**, aplikasi akan langsung terhubung ke database MySQL.
