@@ -100,13 +100,17 @@ Basis data SIPANTAS dirancang menggunakan **MySQL 8.0** pada database `sipantas_
 
 ![12 Database MySQL phpMyAdmin](docs/screenshots/12_database_mysql_phpmyadmin.png)
 
-### Struktur Tabel Utama:
-1. **`users`**: Menyimpan kredensial pengguna, NIK (16 digit), role (`warga`, `rtrw`, `kecamatan`), wilayah (`rt_id`, `rw_id`, `kelurahan_id`), serta URL foto profil.
-2. **`pengajuan_surat`**: Menyimpan permohonan surat, nomor surat unik, status alur (`menunggu_rt`, `menunggu_kecamatan`, `selesai`, `ditolak`), path berkas tanda tangan RT (`uploads/ttd/`), dan token QR Code resmi.
-3. **`pengajuan_audit_logs`**: Menyimpan riwayat perubahan status, aktor penanggung jawab, catatan verifikasi, dan stempel waktu (*timestamp*).
-4. **`antrean`**: Menyimpan nomor antrean loket, tanggal kunjungan, sesi waktu, dan status kehadiran warga.
-5. **`notifikasi`**: Menyimpan riwayat notifikasi in-app untuk warga terkait pengajuan surat dan pengingat antrean H-1.
-6. **`wilayah_*`** (`kecamatan`, `kelurahan`, `rw`, `rt`): Menyimpan hierarki administratif kewilayahan Kota Makassar.
+### Struktur 10 Tabel Database (Sesuai phpMyAdmin):
+1. **`antrean_layanan`**: Menyimpan data booking tiket nomor antrean loket pelayanan kelurahan, tanggal, sesi waktu, dan status kehadiran.
+2. **`audit_log`**: Menyimpan jejak riwayat verifikasi approval surat (*audit trail*), aktor penanggung jawab (Warga / RT / Kelurahan), catatan penolakan/persetujuan, dan stempel waktu (*timestamp*).
+3. **`laporan_warga`**: Menyimpan data aduan dan aspirasi kendala lingkungan warga beserta lampiran bukti foto.
+4. **`notifikasi`**: Menyimpan riwayat notifikasi *in-app* untuk warga dan petugas terkait pembaruan surat dan pengingat antrean H-1.
+5. **`pengajuan_surat`**: Menyimpan data permohonan surat kependudukan, nomor surat unik, status alur berjenjang (*menunggu_rt*, *menunggu_kecamatan*, *selesai*), path berkas tanda tangan RT (`uploads/ttd/`), dan token QR Code resmi.
+6. **`users`**: Menyimpan data kredensial akun, NIK (16 digit), nama lengkap, role (`warga`, `rtrw`, `kecamatan`), pemetaan wilayah (`rt_id`, `rw_id`, `kelurahan_id`), dan path foto profil.
+7. **`wilayah_kecamatan`**: Menyimpan data master wilayah administratif tingkat kecamatan (Kota Makassar).
+8. **`wilayah_kelurahan`**: Menyimpan data master wilayah kelurahan (seperti Kelurahan Paccerakkang, Daya, dll.).
+9. **`wilayah_rt`**: Menyimpan data master rukun tetangga (RT) binaan.
+10. **`wilayah_rw`**: Menyimpan data master rukun warga (RW) binaan.
 
 ---
 
