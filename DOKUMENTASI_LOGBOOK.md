@@ -10,46 +10,44 @@
 
 ## 1. Pembuatan Fitur Utama
 
-Sistem SIPANTAS mengintegrasikan alur birokrasi persuratan kependudukan secara berjenjang antara **Warga**, **Ketua RT/RW**, dan **Kelurahan/Kecamatan** secara paperless dan real-time.
+Sistem SIPANTAS mengintegrasikan alur birokrasi persuratan kependudukan secara berjenjang antara **Warga**, **Ketua RT/RW**, dan **Kelurahan/Kecamatan** secara real-time dan terotentikasi.
 
-### A. Pengajuan Surat Mandiri oleh Warga
-Warga dapat memilih 4 kategori layanan surat:
-1. *Surat Keterangan Domisili*
-2. *Surat Pengantar RT / RW*
-3. *Surat Keterangan Tidak Mampu (SKTM)*
-4. *Surat Keterangan Usaha (SKU)*
+### A. Beranda & Dashboard Terintegrasi Petugas RT/RW
+Halaman beranda petugas menampilkan ringkasan jumlah permohonan warga yang memerlukan tindakan, tombol aksi cepat *"Tinjau surat warga"*, pemesanan tiket antrean kelurahan, serta pelaporan masalah lingkungan.
 
-Tab **Pengajuan** dirancang interaktif: menampilkan riwayat surat aktif beserta status berjalannya (*Menunggu TTD RT*, *Menunggu Kelurahan*, *Selesai & Terbit*), dan katalog permohonan baru dapat dibuka via tombol **"+ Ajukan Permohonan Surat Baru"**.
-
-![01 Pengajuan Surat Warga](docs/screenshots/01_fitur_utama_pengajuan_warga.png)
+![01 Beranda Dashboard](docs/screenshots/01_beranda_dashboard_rt.png)
 
 ---
 
-### B. Otorisasi & Hak Akses Berbasis Role (RT/RW & Kelurahan)
-Sesuai regulasi administrasi kewilayahan:
-* **Ketua RT/RW dan Petugas Kelurahan dilarang membuat permohonan surat** (tombol buat surat dinonaktifkan/disembunyikan otomatis).
-* Tab **Pengajuan** bagi petugas otomatis beralih fungsi menjadi **Meja Verifikasi Surat Masuk**, menampilkan daftar permohonan warga yang menunggu tindak lanjut.
+### B. Meja Verifikasi Surat Masuk RT/RW & Otorisasi Role
+Sesuai aturan administrasi pemerintahan:
+* **Ketua RT/RW dan Petugas Kelurahan dilarang membuat surat permohonan warga** (katalog pembuatan surat dinonaktifkan untuk petugas).
+* Tab **Pengajuan** bagi petugas beralih fungsi menjadi **Meja Verifikasi Surat Masuk**, menampilkan seluruh surat warga (SKU, SKTM, Surat Domisili, Surat Pengantar) lengkap dengan status verifikasi berjenjang.
 
-![02 Verifikasi RT/RW](docs/screenshots/02_fitur_utama_verifikasi_rtrw.png)
+![02 Verifikasi Surat Masuk RT/RW](docs/screenshots/02_verifikasi_surat_rtrw.png)
 
 ---
 
 ### C. Tanda Tangan Digital Elektronik (Canvas Digital Signature)
-Petugas RT/RW dapat memeriksa dokumen pemohon dan membubuhkan tanda tangan elektronik langsung di layar HP menggunakan kanvas digital. Berkas tanda tangan dikonversi menjadi gambar PNG dan diunggah langsung ke server REST API backend melalui multipart request.
+Petugas RT/RW dapat memeriksa dokumen pemohon dan membubuhkan tanda tangan elektronik langsung di layar HP menggunakan kanvas sentuh interaktif. Goresan tanda tangan dikonversi menjadi berkas gambar PNG beresolusi tajam dan diunggah langsung ke server REST API backend melalui multipart request.
 
-![03 TTD Digital Canvas](docs/screenshots/03_fitur_utama_ttd_digital_canvas.png)
-
----
-
-### D. Pengesahan Kelurahan & QR Code Autentikasi Dokumen
-Setelah surat disetujui RT/RW, berkas otomatis diteruskan ke Kelurahan/Kecamatan. Petugas Kelurahan mengesahkan surat dan menerbitkan **QR Code resmi ber-token kriptografis**. QR Code dapat dipindai oleh pihak ketiga (bank, instansi, dsb.) untuk memverifikasi keaslian surat tanpa perlu stempel basah.
-
-![04 Pengesahan QR](docs/screenshots/04_fitur_utama_pengesahan_kelurahan_qr.png)
+![03 TTD Digital Canvas](docs/screenshots/03_ttd_digital_canvas.png)
 
 ---
 
-### E. Bottom Navigation Bar Seragam
-Navigasi utama aplikasi distandarisasi menggunakan **4-Tab Bottom Navigation Bar** (*Beranda*, *Pengajuan*, *Kabar*, dan *Bantuan/Akun*) tanpa tombol panah kembali (*back button*) di header atas, memberikan alur perpindahan layar yang intuitif.
+### D. Detail Permohonan & Pelacakan Jejak Audit (Audit Trail)
+Setiap pengajuan surat dilengkapi jejak riwayat proses (*Audit Log*) transparan yang merekam stempel waktu saat diajukan warga, saat disetujui/ditandatangani RT, hingga diteruskan ke tingkat kelurahan/kecamatan.
+
+![04 Detail Lacak Pengajuan](docs/screenshots/04_detail_lacak_pengajuan_audit.png)
+
+![05 Status Menunggu Kecamatan](docs/screenshots/05_detail_status_menunggu_kecamatan.png)
+
+---
+
+### E. Pusat Kabar & Notifikasi Real-time
+Warga dan petugas menerima notifikasi otomatis saat ada permohonan surat baru yang masuk atau status surat telah diperbarui, lengkap dengan tab filter kategori (*Semua*, *Surat*, *Antrean*, dan *Laporan*).
+
+![11 Pusat Kabar Notifikasi](docs/screenshots/11_pusat_kabar_notifikasi.png)
 
 ---
 
@@ -57,26 +55,31 @@ Navigasi utama aplikasi distandarisasi menggunakan **4-Tab Bottom Navigation Bar
 
 Sistem SIPANTAS mengimplementasikan operasi CRUD secara menyeluruh pada setiap entitas modul:
 
-### A. CRUD Profil & Avatar Pengguna (Update & Read)
-Warga dan petugas dapat memperbarui data kontak dan domisili melalui dialog formulir terintegrasi, serta mengunggah foto profil dari galeri/kamera yang tersimpan langsung di server backend.
-* **Read:** Menampilkan profil, status akun terverifikasi, dan foto profil pengguna.
-* **Update:** Endpoint `update_profile.php` memproses pembaruan nama, no HP, email, alamat domisili, dan upload berkas foto.
+### A. CRUD Pembuatan Surat Warga (Create) - 3 Langkah Terpadu
+Warga dapat membuat permohonan surat baru melalui wizard 3 langkah yang terstruktur:
+1. **Langkah 1 (Data Diri):** Memilih tujuan pengantar wilayah (KTP Domisili Tetap vs Tempat Kos/Kontrak Sementara) dan menuliskan keperluan surat.
+2. **Langkah 2 (Unggah Berkas):** Melampirkan foto KTP, Kartu Keluarga, atau dokumen pendukung lain dari galeri HP (maks. 2MB).
+3. **Langkah 3 (Tinjau & Kirim):** Memeriksa ringkasan permohonan, mencentang pernyataan keabsahan dokumen, dan mengirimkan permohonan ke sistem.
 
-![05 Ubah Profil dan Foto](docs/screenshots/05_crud_ubah_profil_dan_foto.png)
+![06 Ajukan Surat Step 1](docs/screenshots/06_crud_ajukan_surat_step1.png)
 
----
+![07 Ajukan Surat Step 2](docs/screenshots/07_crud_ajukan_surat_step2_upload.png)
 
-### B. CRUD Registrasi Warga Baru (Create) dengan RT & RW Terpisah
-Formulir registrasi warga menerapkan pemisahan input **Nomor RW** dan **Nomor RT** menjadi dua field tersendiri untuk menjamin akurasi pemetaan wilayah domisili di database. Form otomatis bersih dari teks contoh saat dibuka pertama kali.
-
-![06 Registrasi RW dan RT](docs/screenshots/06_crud_form_registrasi_rw_rt.png)
+![08 Ajukan Surat Step 3](docs/screenshots/08_crud_ajukan_surat_step3_tinjau.png)
 
 ---
 
-### C. CRUD Aktivasi Akun Petugas dengan Wajib NIK (Create)
-Aktivasi akun petugas (Ketua RT, RW, dan Petugas Kelurahan) kini mewajibkan input **Nomor NIK 16 digit** dan kode undangan penugasan resmi sebagai lapisan autentikasi ganda sebelum diberikan hak akses verifikasi surat.
+### B. CRUD Pembatalan Permohonan Surat (Delete)
+Sebelum permohonan ditindaklanjuti oleh petugas RT, warga memiliki hak untuk membatalkan pengajuan surat secara mandiri melalui tombol **"Batalkan Pengajuan Ini"** pada halaman detail surat.
 
-![07 Aktivasi Petugas NIK](docs/screenshots/07_crud_aktivasi_petugas_nik.png)
+![09 Batalkan Pengajuan](docs/screenshots/09_crud_batalkan_pengajuan.png)
+
+---
+
+### C. CRUD Profil & Avatar Pengguna (Update & Read)
+Warga dan petugas dapat memperbarui data kontak dan domisili melalui tombol **"UBAH DATA PROFIL"**, serta mengganti foto avatar profil melalui kamera/galeri yang langsung terunggah ke server.
+
+![10 Akun dan Profil](docs/screenshots/10_crud_akun_dan_profil.png)
 
 ---
 
@@ -84,18 +87,18 @@ Aktivasi akun petugas (Ketua RT, RW, dan Petugas Kelurahan) kini mewajibkan inpu
 
 | Modul Entitas | Create (C) | Read (R) | Update (U) | Delete (D) |
 | :--- | :--- | :--- | :--- | :--- |
-| **Permohonan Surat** | Pengajuan surat baru & upload lampiran di `ApplyLetterActivity`. | Menampilkan daftar riwayat surat & detail surat ber-QR di `ServiceListActivity`. | TTD digital RT/RW & Pengesahan status kelurahan di `LetterDetailActivity`. | Pembatalan surat mandiri oleh pemohon sebelum diproses petugas. |
+| **Permohonan Surat** | Pengajuan surat 3 tahap & upload lampiran di `ApplyLetterActivity`. | Menampilkan daftar riwayat surat & status tracking di `ServiceListActivity`. | TTD digital RT/RW & Pengesahan status kelurahan di `LetterDetailActivity`. | Pembatalan surat mandiri via tombol *Batalkan Pengajuan Ini*. |
 | **Antrean Kelurahan** | Booking tiket antrean pelayanan (sesi pagi/siang) di `QueueActivity`. | Cek nomor antrean aktif & kuota tersisa secara real-time. | Panggilan nomor urut oleh petugas loket kelurahan. | Pembatalan tiket nomor antrean oleh warga. |
 | **Laporan Warga** | Kirim aduan/aspirasi warga + foto bukti di `ReportActivity`. | Monitoring progres tindak lanjut aduan warga. | Pembaruan status penanganan oleh satgas kelurahan. | Penutupan atau penghapusan berkas laporan yang telah selesai. |
-| **Akun & Sesi** | Pendaftaran warga & aktivasi petugas ber-NIK. | Auto-login sesi pengguna saat membuka aplikasi di `SplashActivity`. | Ubah data profil dan unggah avatar foto profil. | Logout / hapus sesi autentikasi perangkat. |
+| **Akun & Sesi** | Pendaftaran warga & aktivasi akun petugas. | Auto-login sesi pengguna saat membuka aplikasi di `SplashActivity`. | Ubah data profil dan unggah avatar foto profil. | Logout / hapus sesi autentikasi perangkat. |
 
 ---
 
-## 3. Basis Data (Database MySQL)
+## 3. Basis Data (Database MySQL & phpMyAdmin)
 
 Basis data SIPANTAS dirancang menggunakan **MySQL 8.0** pada database `sipantas_db` melalui antarmuka **phpMyAdmin**, menerapkan integritas referensial dan pengindeksan performa tinggi.
 
-![08 Database MySQL phpMyAdmin](docs/screenshots/08_database_mysql_phpmyadmin.png)
+![12 Database MySQL phpMyAdmin](docs/screenshots/12_database_mysql_phpmyadmin.png)
 
 ### Struktur Tabel Utama:
 1. **`users`**: Menyimpan kredensial pengguna, NIK (16 digit), role (`warga`, `rtrw`, `kecamatan`), wilayah (`rt_id`, `rw_id`, `kelurahan_id`), serta URL foto profil.
@@ -114,7 +117,7 @@ Komunikasi antara aplikasi Android dan server backend menggunakan arsitektur **R
 ### A. Pengujian Endpoint REST API
 Endpoint diuji menggunakan format respons standar `{ "success": true, "message": "...", "data": [...] }`. Seluruh endpoint backend dapat diakses secara lokal maupun nirkabel melalui IP Wi-Fi laptop (`http://192.168.1.38/api_sipantas/`).
 
-![09 REST API Testing JSON](docs/screenshots/09_rest_api_testing_json.png)
+![13 REST API Testing JSON](docs/screenshots/13_rest_api_testing_json.png)
 
 ### B. Daftar Endpoint REST API Utama:
 * `POST /api_sipantas/login.php` $\rightarrow$ Autentikasi NIK dan password akun.
@@ -133,7 +136,7 @@ Endpoint diuji menggunakan format respons standar `{ "success": true, "message":
 ### C. Version Control & Git Diff di Android Studio
 Setiap pembaruan kode tercatat dengan rapi di sistem kontrol versi Git Android Studio, memastikan integritas dan kemudahan pelacakan riwayat perubahan kode:
 
-![10 Android Studio Git Diff](docs/screenshots/10_android_studio_git_diff.png)
+![14 Android Studio Git Diff](docs/screenshots/14_android_studio_git_diff.png)
 
 ---
 
@@ -142,6 +145,6 @@ Setiap pembaruan kode tercatat dengan rapi di sistem kontrol versi Git Android S
 | Berkas | Deskripsi |
 | :--- | :--- |
 | `app/build/outputs/apk/debug/app-debug.apk` | Berkas installer APK Android terbaru (Build Success) |
-| `docs/screenshots/` | Folder berisi 10 tangkapan layar antarmuka & dokumentasi logbook |
+| `docs/screenshots/` | Folder berisi tangkapan layar antarmuka & dokumentasi logbook |
 | `backend_api/` & `C:\xampp\htdocs\api_sipantas\` | Skrip backend PHP REST API & konfigurasi MySQL |
 | `app/src/main/java/com/example/sipantas/` | Sumber kode aplikasi Android (Kotlin) |
